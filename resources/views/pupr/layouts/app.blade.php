@@ -66,14 +66,17 @@
                     </a>
 
                     <nav class="hidden md:flex items-center gap-2">
-                        <a href="{{ route('pupr.dashboard') }}" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.dashboard') ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <a href="{{ route('pupr.dashboard') }}" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.dashboard') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
                             Dashboard Operasional
                         </a>
 
-                        <a href="{{ route('pupr.riwayat') }}"
-                              class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.riwayat') ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
-                               Riwayat Penanganan
-                           </a>
+                        <a href="{{ route('pupr.tim-lapangan.index') }}" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.tim-lapangan.*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                            Tim Lapangan
+                        </a>
+
+                        <a href="{{ route('pupr.riwayat') }}" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.riwayat*') ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                            Riwayat Penanganan
+                        </a>
                     </nav>
                 </div>
 
