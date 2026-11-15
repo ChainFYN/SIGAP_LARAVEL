@@ -34,6 +34,12 @@ class DashboardController extends Controller
             });
 
         $laporan_diproses = $applyTimeFilter($laporanQuery)
+            ->orderByRaw("CASE
+                WHEN LOWER(tingkat_bahaya) IN ('bahaya tinggi', 'tinggi', 'berat') THEN 1
+                WHEN LOWER(tingkat_bahaya) = 'sedang' THEN 2
+                WHEN LOWER(tingkat_bahaya) IN ('rendah', 'ringan') THEN 3
+                ELSE 4
+            END ASC")
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -93,7 +99,7 @@ class DashboardController extends Controller
             default => 'Semua Waktu',
         };
 
-        return view('pupr.dashboard', [
+        $viewData = [
             'laporan_diproses' => $laporan_diproses,
             'siapDikerjakanCount' => $siapDikerjakanCount,
             'diprosesCount' => $diprosesCount,
@@ -108,7 +114,13 @@ class DashboardController extends Controller
                 'selesai' => $selesaiDiverifikasi,
                 'tim_tersedia' => $timTersediaCount,
             ],
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('pupr.partials.dashboard_content', $viewData);
+        }
+
+        return view('pupr.dashboard', $viewData);
     }
 
     public function riwayat(Request $request)
@@ -127,8 +139,8 @@ class DashboardController extends Controller
         if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('id_laporan', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%")
-                  ->orWhereHas('jalan', fn ($q2) => $q2->where('nama_jalan', 'like', "%{$search}%"));
+                    ->orWhere('deskripsi', 'like', "%{$search}%")
+                    ->orWhereHas('jalan', fn ($q2) => $q2->where('nama_jalan', 'like', "%{$search}%"));
             });
         }
 
@@ -172,6 +184,10 @@ class DashboardController extends Controller
             $riwayatLaporan = $riwayatLaporan->where('progres_persen', '<', 100);
         } elseif ($filterStatus === '100') {
             $riwayatLaporan = $riwayatLaporan->where('progres_persen', '>=', 100);
+        }
+
+        if ($request->ajax()) {
+            return view('pupr.riwayat.partials.table', compact('riwayatLaporan', 'filterStatus', 'search'));
         }
 
         return view('pupr.riwayat.index', compact('riwayatLaporan', 'filterStatus', 'search'));

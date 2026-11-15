@@ -1,0 +1,390 @@
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-7 mt-6">
+
+    <!-- ==================== LEFT COLUMN: QUEUE & FILTERS (4 COLS) ==================== -->
+    <div class="lg:col-span-4 flex flex-col gap-4">
+
+        <!-- Live Search Bar -->
+        <form action="{{ route('kecamatan.validation.index') }}" method="GET" class="relative">
+            <input type="hidden" name="tab" value="{{ $tab }}">
+            <input type="hidden" name="waktu" value="{{ $timeFilter }}">
+            <div class="relative">
+                <input type="text"
+                       name="search"
+                       value="{{ $search }}"
+                       placeholder="Cari id laporan, jalan, pelapor..."
+                       class="w-full pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl shadow-2xs focus:outline-none focus:border-brand-500">
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+            </div>
+        </form>
+
+        <!-- Filter Tabs Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs">
+            <a href="{{ route('kecamatan.validation.index', ['tab' => 'pending', 'search' => $search, 'waktu' => $timeFilter]) }}"
+               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ $tab == 'pending' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                Perlu Verifikasi ({{ $pendingCount }})
+            </a>
+            <a href="{{ route('kecamatan.validation.index', ['tab' => 'diterima', 'search' => $search, 'waktu' => $timeFilter]) }}"
+               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['diterima', 'selesai', 'resolved']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                Diterima ({{ $diterimaCount }})
+            </a>
+            <a href="{{ route('kecamatan.validation.index', ['tab' => 'ditolak', 'search' => $search, 'waktu' => $timeFilter]) }}"
+               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['ditolak', 'rejected']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                Ditolak ({{ $ditolakCount }})
+            </a>
+        </div>
+
+        <!-- TICKET QUEUE LIST -->
+        <div class="flex flex-col gap-3 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar">
+            @forelse($tickets as $t)
+            @php
+                $isActive = $activeTicket && $activeTicket->id_laporan === $t->id_laporan;
+                $badgeClass = $t->tingkat_bahaya === 'Bahaya Tinggi'
+                    ? 'bg-red-500 text-white'
+                    : ($t->tingkat_bahaya === 'Sedang' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white');
+            @endphp
+            <a href="{{ route('kecamatan.validation.index', ['ticket' => $t->id_laporan, 'tab' => $tab, 'search' => $search, 'waktu' => $timeFilter]) }}"
+               class="p-4 rounded-2xl border transition-all text-left block relative {{ $isActive ? 'bg-emerald-50/40 border-emerald-500 shadow-sm ring-1 ring-emerald-500' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xs' }}">
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono text-xs font-bold text-slate-900">{{ $t->id_laporan }}</span>
+                        <span class="text-[10px] text-slate-400 font-medium">
+                            {{ $t->kategori->nama_kategori ?? '-' }}
+                        </span>
+                    </div>
+                    <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full {{ $badgeClass }}">
+                        {{ $t->tingkat_bahaya }}
+                    </span>
+                </div>
+
+                <h4 class="text-xs font-bold text-slate-900 mt-2 truncate">
+                    {{ $t->jalan->nama_jalan ?? 'Jalan tidak diketahui' }}
+                </h4>
+
+                <p class="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                    {{ Str::limit($t->deskripsi, 60) }}
+                </p>
+
+                <div class="flex items-center justify-between text-[10px] text-slate-400 font-medium mt-2.5 pt-2 border-t border-slate-100">
+                    <span class="truncate max-w-[130px]">
+                        <i class="fa-regular fa-user mr-1"></i>{{ $t->pengguna->nama_lengkap ?? '-' }}
+                    </span>
+                    <span>{{ $t->created_at ? $t->created_at->format('d M Y, H:i') . ' WIB' : 'Hari ini' }}</span>
+                </div>
+
+                @if($isActive)
+                    <div class="absolute -left-1 top-4 bottom-4 w-1 bg-emerald-600 rounded-r"></div>
+                @endif
+            </a>
+            @empty
+            <div class="p-6 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-500">
+                Tidak ada laporan pada antrean ini.
+            </div>
+            @endforelse
+        </div>
+
+    </div>
+
+    <!-- ==================== RIGHT COLUMN: TICKET INSPECTION & DISPOSITION (8 COLS) ==================== -->
+    <div class="lg:col-span-8 flex flex-col gap-6">
+
+        @if($activeTicket)
+        <!-- TICKET HEADER -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                        Detail Laporan <span class="font-mono text-brand-600">   {{ $activeTicket->id_laporan }}</span>
+                    </h2>
+                    @php
+                        $statusClass = match($activeTicket->id_status) {
+                            2 => 'bg-blue-100 text-blue-800 border border-blue-300',
+                            3 => 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+                            4 => 'bg-red-100 text-red-800 border border-red-300',
+                            default => 'bg-amber-100 text-amber-800 border border-amber-300',
+                        };
+                    @endphp
+                    <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full {{ $statusClass }}">
+                        {{ $activeTicket->status->nama_status ?? 'Menunggu Validasi' }}
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium mt-1">
+                    Kategori: <strong class="text-slate-700">{{ $activeTicket->kategori->nama_kategori ?? '-' }}</strong>
+                    • Jalan: {{ $activeTicket->jalan->nama_jalan ?? '-' }}
+                    • Desa: {{ $activeTicket->jalan->desa->nama_desa ?? '-' }}
+                </p>
+            </div>
+
+            <!-- Share Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="navigator.clipboard.writeText(window.location.href); alert('Tautan berhasil disalin!');"
+                        class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+                        title="Bagikan Tautan">
+                    <i class="fa-solid fa-share-nodes text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SECTION 1: PEMERIKSAAN BUKTI LAPANGAN -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-camera-retro"></i>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Pemeriksaan Bukti Lapangan & Validasi Warga</h3>
+                </div>
+                <span class="text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <i class="fa-solid fa-circle-check text-[10px]"></i>
+                    <span>{{ $activeTicket->tingkat_bahaya }}</span>
+                </span>
+            </div>
+
+            <!-- Media Comparison: Photo Evidence + Interactive GIS Map -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <!-- Left: Citizen Photo Evidence -->
+                <div class="relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group h-64">
+                    @if($activeTicket->url_foto)
+                        <img src="{{ asset('storage/' . $activeTicket->url_foto) }}"
+                             alt="Bukti foto jalan rusak"
+                             class="w-full h-full object-cover">
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2">
+                            <i class="fa-solid fa-image text-3xl"></i>
+                            <span class="text-xs font-semibold">Tidak ada foto</span>
+                        </div>
+                    @endif
+                    <div class="absolute bottom-2 left-2 right-2 bg-slate-950/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded flex items-center justify-between">
+                        <span>{{ $activeTicket->created_at ? $activeTicket->created_at->format('d M Y - H:i') : 'Hari ini' }} WIB</span>
+                        @if($activeTicket->latitude && $activeTicket->longitude)
+                            <span class="text-emerald-400 font-bold">GPS Valid</span>
+                        @else
+                            <span class="text-amber-400 font-bold">Tanpa GPS</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Right: Interactive Leaflet GIS Map -->
+                <div class="relative rounded-xl overflow-hidden border border-slate-200 h-64">
+                    @if($activeTicket->latitude && $activeTicket->longitude)
+                        <div id="ticketMap" class="w-full h-full z-10"
+                             data-lat="{{ $activeTicket->latitude }}"
+                             data-lng="{{ $activeTicket->longitude }}"
+                             data-id="{{ $activeTicket->id_laporan }}"
+                             data-jalan="{{ $activeTicket->jalan->nama_jalan ?? '' }}"></div>
+                    @else
+                        <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2 bg-slate-50">
+                            <i class="fa-solid fa-map-location-dot text-3xl"></i>
+                            <span class="text-xs font-semibold">Koordinat GPS tidak tersedia</span>
+                        </div>
+                    @endif
+                </div>
+
+            </div>
+
+            <!-- Reporter Identity Card -->
+            <div class="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 text-white font-bold flex items-center justify-center shrink-0 text-xs">
+                        {{ strtoupper(substr($activeTicket->pengguna->nama_lengkap ?? 'WA', 0, 2)) }}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h4 class="text-xs font-bold text-slate-900">{{ $activeTicket->pengguna->nama_lengkap ?? '-' }}</h4>
+                            <span class="text-[9px] font-semibold bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded border border-emerald-300">
+                                Warga Terdaftar
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">
+                            Email: {{ $activeTicket->pengguna->email ?? '-' }}
+                            • Telepon: {{ $activeTicket->pengguna->telepon ?? '-' }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="text-left sm:text-right shrink-0">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Dilaporkan</span>
+                    <span class="text-xs font-extrabold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 inline-block mt-0.5">
+                        {{ $activeTicket->created_at ? $activeTicket->created_at->format('d M Y, H:i') . ' WIB' : '-' }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Citizen Description Text -->
+            <div class="mt-4">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-1">
+                    DESKRIPSI LAPORAN MASUK OLEH WARGA
+                </span>
+                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 italic leading-relaxed">
+                    "{{ $activeTicket->deskripsi }}"
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SECTION 2: KEPUTUSAN VERIFIKATOR KECAMATAN (FORM DISPOSISI) -->
+        @if($activeTicket->id_status == 1)
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs" x-data="{ decisionAction: '{{ old('action', 'acc') }}', charCount: {{ strlen(old('catatan', '')) }} }">
+
+            <div class="border-b border-slate-200 pb-3">
+                <h3 class="text-sm font-extrabold text-slate-900">Keputusan Verifikator Kecamatan</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Tentukan disposisi status aduan ini untuk diteruskan ke Dinas PUPR Kabupaten Jember.</p>
+            </div>
+
+            {{-- Flash message inline --}}
+            @if(session('status'))
+                <div class="mt-4 p-3 rounded-xl text-xs font-bold flex items-center gap-2
+                    {{ session('status_type') === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : '' }}
+                    {{ session('status_type') === 'warning' ? 'bg-amber-50 text-amber-800 border border-amber-200' : '' }}
+                    {{ session('status_type') === 'info' ? 'bg-blue-50 text-blue-800 border border-blue-200' : '' }}">
+                    <i class="fa-solid {{ session('status_type') === 'success' ? 'fa-circle-check text-emerald-600' : (session('status_type') === 'warning' ? 'fa-triangle-exclamation text-amber-600' : 'fa-circle-info text-blue-600') }}"></i>
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            <form action="{{ route('kecamatan.validation.update', $activeTicket->id_laporan) }}" method="POST" class="mt-4 flex flex-col gap-5">
+                @csrf
+                @method('POST')
+                <input type="hidden" name="action" :value="decisionAction">
+
+                <!-- Option Cards (ACC vs REJECT) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    <!-- Option 1: ACC -->
+                    <div @click="decisionAction = 'acc'"
+                         :class="decisionAction === 'acc' ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300'"
+                         class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold" :class="decisionAction === 'acc' ? 'text-emerald-900' : 'text-slate-800'">
+                                ACC — Teruskan ke PUPR
+                            </span>
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center border"
+                                 :class="decisionAction === 'acc' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'">
+                                <i class="fa-solid fa-check text-[10px]" x-show="decisionAction === 'acc'"></i>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed mt-2">
+                            Laporan valid dan memenuhi syarat teknis. Diteruskan ke UPT PUPR Kabupaten Jember.
+                        </p>
+                    </div>
+
+                    <!-- Option 2: Reject -->
+                    <div @click="decisionAction = 'reject'"
+                         :class="decisionAction === 'reject' ? 'border-red-500 bg-red-50/50 ring-2 ring-red-500' : 'border-slate-200 bg-white hover:border-slate-300'"
+                         class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold" :class="decisionAction === 'reject' ? 'text-red-900' : 'text-slate-800'">
+                                REJECT — Tolak Aduan Warga
+                            </span>
+                            <div class="w-5 h-5 rounded-full flex items-center justify-center border"
+                                 :class="decisionAction === 'reject' ? 'bg-red-600 border-red-600 text-white' : 'border-slate-300 bg-white'">
+                                <i class="fa-solid fa-xmark text-[10px]" x-show="decisionAction === 'reject'"></i>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 leading-relaxed mt-2">
+                            Laporan duplikat, tidak relevan, di luar kewenangan kabupaten, atau data bukti tidak konklusif.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Textarea Catatan -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-slate-700">
+                            Catatan Verifikator Kecamatan
+                            <span class="text-red-500 text-[10px] font-semibold">* (Wajib diisi)</span>
+                        </label>
+                        <span class="text-[10px] text-slate-400 font-mono">
+                            <span x-text="charCount"></span> karakter
+                        </span>
+                    </div>
+                    <textarea name="catatan"
+                              rows="3"
+                              @input="charCount = $el.value.length"
+                              oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s\n\r.,!?\-()]/g, '')"
+                              class="w-full text-xs font-medium text-slate-800 bg-white border rounded-xl p-3 focus:outline-none focus:border-brand-500 leading-relaxed {{ $errors->has('catatan') ? 'border-red-400 bg-red-50/30' : 'border-slate-300' }}"
+                              placeholder="Tuliskan catatan teknis dan arahan penanganan (wajib diisi, tanpa simbol)...">{{ old('catatan') }}</textarea>
+                    @error('catatan')
+                        <div class="mt-1.5 flex items-center gap-1.5 text-red-600 text-[11px] font-semibold">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
+
+                <!-- Digital Verification Badge -->
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-certificate text-emerald-600"></i>
+                        <span class="text-slate-700">
+                            Divalidasi oleh: <strong>{{ session('kecamatan_name', 'Admin Kecamatan') }}</strong>
+                        </span>
+                    </div>
+                    <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300 shrink-0">
+                        Otoritas Terverifikasi
+                    </span>
+                </div>
+
+                <!-- Form Action Button -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="submit"
+                            :class="decisionAction === 'acc' ? 'bg-brand-600 hover:bg-brand-700' : 'bg-red-600 hover:bg-red-700'"
+                            class="w-full sm:w-auto px-6 py-2.5 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fa-solid" :class="decisionAction === 'acc' ? 'fa-paper-plane' : 'fa-xmark'"></i>
+                        <span x-text="decisionAction === 'acc' ? 'Submit Disposisi (ACC ke Dinas PUPR)' : 'Submit Keputusan (Tolak Aduan)'">Submit Keputusan</span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+        @else
+        <!-- Sudah Divalidasi -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+            <div class="text-center py-6">
+                @if($activeTicket->id_status == 2)
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-person-digging text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Telah Divalidasi & Diteruskan ke PUPR</h3>
+                    <p class="text-xs text-slate-500 mt-1">Catatan: {{ $activeTicket->validasi->catatan ?? '-' }}</p>
+                @elseif($activeTicket->id_status == 3)
+                    <div class="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-circle-check text-emerald-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Selesai Dikerjakan</h3>
+                    <p class="text-xs text-slate-500 mt-1">{{ $activeTicket->validasi->catatan ? 'Catatan Verifikasi: ' . $activeTicket->validasi->catatan : 'Pekerjaan perbaikan jalan telah rampung 100%.' }}</p>
+                @elseif($activeTicket->id_status == 4)
+                    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-circle-xmark text-red-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Ditolak</h3>
+                    <p class="text-xs text-slate-500 mt-1">Alasan: {{ $activeTicket->validasi->catatan ?? '-' }}</p>
+                @else
+                    <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-clock text-slate-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Status: {{ $activeTicket->status->nama_status ?? '-' }}</h3>
+                @endif
+            </div>
+        </div>
+        @endif
+
+        @else
+        <!-- Empty State -->
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                <i class="fa-solid fa-inbox text-slate-400 text-2xl"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-slate-700">Tidak ada laporan yang perlu divalidasi</h3>
+            <p class="text-xs text-slate-400 mt-1">Semua laporan warga sudah diproses atau belum ada laporan masuk.</p>
+        </div>
+        @endif
+
+    </div>
+
+</div>
+

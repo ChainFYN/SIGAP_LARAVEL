@@ -87,7 +87,7 @@ class ValidationController extends Controller
             default => 'Semua Waktu',
         };
 
-        return view('kecamatan.validation.index', compact(
+        $viewData = compact(
             'tickets',
             'activeTicket',
             'tab',
@@ -100,7 +100,13 @@ class ValidationController extends Controller
             'activeQueueToday',
             'timeFilter',
             'filterLabel'
-        ));
+        );
+
+        if ($request->ajax()) {
+            return view('kecamatan.validation.partials.workspace', $viewData);
+        }
+
+        return view('kecamatan.validation.index', $viewData);
     }
 
     public function update(Request $request, $id)

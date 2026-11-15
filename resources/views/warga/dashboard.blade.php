@@ -130,10 +130,6 @@
                        class="filter-btn px-3 py-1.5 rounded-lg font-bold transition-all {{ $timeFilter === 'hari_ini' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                         Hari Ini
                     </button>
-                    <button type="button" onclick="applyFilter('kemarin', this)"
-                       class="filter-btn px-3 py-1.5 rounded-lg font-bold transition-all {{ $timeFilter === 'kemarin' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
-                        Kemarin
-                    </button>
                     <button type="button" onclick="applyFilter('1_minggu', this)"
                        class="filter-btn px-3 py-1.5 rounded-lg font-bold transition-all {{ $timeFilter === '1_minggu' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900' }}">
                         1 Minggu Terakhir

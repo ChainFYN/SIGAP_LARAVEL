@@ -76,7 +76,13 @@ class BastController extends Controller
             default => 'Semua Waktu',
         };
 
-        return view('kecamatan.bast.index', compact('laporan_bast', 'activeBast', 'timeFilter', 'filterLabel', 'search'));
+        $viewData = compact('laporan_bast', 'activeBast', 'timeFilter', 'filterLabel', 'search');
+
+        if ($request->ajax()) {
+            return view('kecamatan.bast.partials.workspace', $viewData);
+        }
+
+        return view('kecamatan.bast.index', $viewData);
     }
 
     public function update(Request $request, $id)
