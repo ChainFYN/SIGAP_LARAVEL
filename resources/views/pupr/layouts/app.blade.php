@@ -44,34 +44,42 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
     <style>
         [x-cloak] { display: none !important; }
+        .navy-gradient {
+            background: linear-gradient(180deg, #0C146A 0%, #101B93 90%, #1523BC 100%);
+            box-shadow: 0 4px 18px rgba(20, 30, 113, 0.18);
+        }
+        .footer-gradient {
+            background: linear-gradient(180deg, #1523BC 0%, #101B93 20%, #0C146A 100%);
+            box-shadow: 0 -4px 18px rgba(20, 30, 113, 0.12);
+        }
     </style>
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased">
 
     <!-- TOP NAVBAR -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xs">
+    <header class="navy-gradient border-b border-white/10 sticky top-0 z-40 shadow-[0_8px_24px_rgba(20,30,113,0.12)]">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
 
                 <!-- Left: Logo & Nav -->
                 <div class="flex items-center gap-8">
                     <a href="{{ route('pupr.dashboard') }}" class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-white">
-                            <i class="fa-solid fa-hard-hat text-lg text-amber-400"></i>
+                        <div class="w-10 h-10 rounded-xl bg-white/95 flex items-center justify-center text-white shadow-md ring-1 ring-white/40">
+                            <i class="fa-solid fa-hard-hat text-lg text-yellow-500"></i>
                         </div>
                         <div>
                             <div class="font-extrabold text-xl tracking-tight text-white leading-none">SIGAP</div>
-                            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-1">PUPR</div>
+                            <div class="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-100/90 mt-1">PUPR</div>
                         </div>
                     </a>
 
                     <nav class="hidden md:flex items-center gap-2">
-                        <a href="{{ route('pupr.dashboard') }}" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.dashboard') ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100' }}">
+                        <a href="{{ route('pupr.dashboard') }}" class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all {{ request()->routeIs('pupr.dashboard') ? 'bg-[#F5F5F5] saturate-50 text-[#141E71] shadow-sm' : 'text-slate-100 hover:text-white hover:bg-white/10' }}">
                             Dashboard Operasional
                         </a>
 
                         <a href="{{ route('pupr.riwayat') }}"
-                              class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all {{ request()->routeIs('pupr.riwayat') ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-800' }}">
+                              class="px-4 py-2.5 text-sm font-semibold rounded-xl transition-all {{ request()->routeIs('pupr.riwayat') ? 'bg-[#F5F5F5] saturate-50 text-[#141E71] shadow-sm' : 'text-slate-100 hover:text-white hover:bg-white/10' }}">
                                Riwayat Penanganan
                            </a>
                     </nav>
@@ -80,7 +88,7 @@
                 <!-- Right: User Profile -->
                 <div class="flex items-center gap-5">
                     <div class="relative">
-                        <button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+                        <button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 shadow-sm ring-1 ring-white/30">
                             <i class="fa-regular fa-bell text-lg"></i>
                         </button>
                         <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-500 border-2 border-white rounded-full"></span>
@@ -88,12 +96,12 @@
 
                     <!-- User Profile & Logout Dropdown -->
                     <div class="relative" x-data="{ profileOpen: false }">
-                        <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 pl-5 border-l border-slate-200 focus:outline-none">
-                            <div class="text-right hidden sm:block text-slate-900">
-                                <div class="text-xs font-extrabold">{{ session('pupr_name', 'Ir. Hendra Gunawan, S.T.') }}</div>
-                                <div class="text-[10px] text-slate-500 font-medium">Koordinator UPT<br>Pemeliharaan Jalan Wilayah 1</div>
+                        <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 pl-5 border-l border-white/15 focus:outline-none">
+                            <div class="text-right hidden sm:block text-slate-100">
+                                <div class="text-xs font-extrabold text-white">{{ session('pupr_name', 'Ir. Hendra Gunawan, S.T.') }}</div>
+                                <div class="text-[10px] text-cyan-100/90 font-medium">Koordinator UPT<br>Pemeliharaan Jalan Wilayah 1</div>
                             </div>
-                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0 hover:bg-slate-300 transition-colors">
+                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 shrink-0 hover:bg-slate-300 transition-colors shadow-sm ring-1 ring-white/30">
                                 <i class="fa-regular fa-user"></i>
                             </div>
                         </button>
@@ -148,38 +156,38 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-slate-100 border-t border-slate-200 mt-12 py-10">
-        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
+    <footer class="footer-gradient border-t border-white/10 mt-12 py-10">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-xs text-slate-200">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div>
-                    <h4 class="font-extrabold text-slate-900 text-sm mb-2">Dinas PUPR Kabupaten Bogor</h4>
-                    <p class="mb-4 text-slate-600 leading-relaxed">Pemerintah Kabupaten Bogor — Bidang Bina Marga dan Pemeliharaan Jalan & Jembatan. Akselerasi pemeliharaan, verifikasi lapangan, dan monitoring pemulihan infrastruktur jalan wilayah Tegar Beriman.</p>
-                    <p class="text-[10px] italic">Alamat: Jl. Tegar Beriman No. 1, Kelurahan Pakansari, Kecamatan Cibinong, Kabupaten Bogor, Jawa Barat 16914</p>
+                    <h4 class="font-extrabold text-white text-sm mb-2">Dinas PUPR Kabupaten Bogor</h4>
+                    <p class="mb-4 text-slate-200 leading-relaxed">Pemerintah Kabupaten Bogor — Bidang Bina Marga dan Pemeliharaan Jalan & Jembatan. Akselerasi pemeliharaan, verifikasi lapangan, dan monitoring pemulihan infrastruktur jalan wilayah Tegar Beriman.</p>
+                    <p class="text-[10px] italic text-slate-300">Alamat: Jl. Tegar Beriman No. 1, Kelurahan Pakansari, Kecamatan Cibinong, Kabupaten Bogor, Jawa Barat 16914</p>
                 </div>
                 <div>
-                    <h5 class="font-extrabold text-slate-900 mb-2">Standar Operasional (SLA)</h5>
-                    <ul class="space-y-1.5 text-slate-600">
+                    <h5 class="font-extrabold text-white mb-2">Standar Operasional (SLA)</h5>
+                    <ul class="space-y-1.5 text-slate-200">
                         <li>• Triage & Validasi: Maks. 24 Jam</li>
                         <li>• Rekomendasi Teknis: 1x 48 Jam Kerja</li>
-                        <li>• Penanganan Darurat: <span class="text-amber-600 font-bold">< 6 Jam</span></li>
+                        <li>• Penanganan Darurat: <span class="text-amber-300 font-bold">< 6 Jam</span></li>
                         <li>• Rekonstruksi Permanen: Sesuai DPA/APBD</li>
                     </ul>
                 </div>
                 <div>
-                    <h5 class="font-extrabold text-slate-900 mb-2">Kontak Siaga Lapangan</h5>
-                    <ul class="space-y-1.5 text-slate-600">
+                    <h5 class="font-extrabold text-white mb-2">Kontak Siaga Lapangan</h5>
+                    <ul class="space-y-1.5 text-slate-200">
                         <li>Call Center PUPR: (021) 8790-1234</li>
                         <li>Radio Trunking UPT 1: CH-08 (Cibinong-Citeureup)</li>
                         <li>Email: bima.pupr@bogorkab.go.id</li>
                     </ul>
                 </div>
             </div>
-            <div class="mt-8 pt-6 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center text-[10px]">
+            <div class="mt-8 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-[10px] text-slate-300">
                 <div>&copy; 2026 Dinas Pekerjaan Umum dan Penataan Ruang Kabupaten Bogor. Hak Cipta Dilindungi Undang-Undang.</div>
                 <div class="flex gap-4 mt-2 md:mt-0">
-                    <a href="#" class="hover:text-slate-800">Infrastruktur Presisi</a>
-                    <a href="#" class="hover:text-slate-800">Transparansi Publik</a>
-                    <a href="#" class="hover:text-slate-800">Sistem Geospasial Terpadu</a>
+                    <a href="#" class="hover:text-white">Infrastruktur Presisi</a>
+                    <a href="#" class="hover:text-white">Transparansi Publik</a>
+                    <a href="#" class="hover:text-white">Sistem Geospasial Terpadu</a>
                 </div>
             </div>
         </div>

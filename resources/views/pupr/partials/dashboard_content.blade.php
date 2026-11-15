@@ -1,59 +1,39 @@
 <!-- KPI CARDS -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32">
-        <div class="flex items-start justify-between">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">TERVALIDASI & SPK CAMAT</div>
-            <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100">
-                <i class="fa-solid fa-file-signature text-xs"></i>
-            </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <div class="flex items-center justify-center">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">TERVALIDASI &amp; SPK CAMAT</div>
         </div>
-        <div class="flex items-baseline gap-2">
+        <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['diproses'] ?? 0 }}</div>
         </div>
-        <div class="flex justify-between items-center text-[10px] font-bold mt-2">
-        </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32">
-        <div class="flex items-start justify-between">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">MENUNGGU VALIDASI CAMAT</div>
-            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center border border-blue-100">
-                <i class="fa-solid fa-clock text-xs"></i>
-            </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <div class="flex items-center justify-center">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">MENUNGGU VALIDASI CAMAT</div>
         </div>
-        <div class="flex items-baseline gap-2">
+        <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['menunggu'] ?? 0 }}</div>
         </div>
-        <div class="flex justify-between items-center text-[10px] font-bold mt-2">
-        </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32">
-        <div class="flex items-start justify-between">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">SELESAI DIVERIFIKASI</div>
-            <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100">
-                <i class="fa-solid fa-check-double text-xs"></i>
-            </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <div class="flex items-center justify-center">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">SELESAI DIVERIFIKASI</div>
         </div>
-        <div class="flex items-baseline gap-2">
+        <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['selesai'] ?? 0 }}</div>
         </div>
-        <div class="flex justify-between items-center text-[10px] font-bold mt-2">
-        </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32">
-        <div class="flex items-start justify-between">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">TOTAL LAPORAN MASUK</div>
-            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200">
-                <i class="fa-solid fa-calendar-check text-xs"></i>
-            </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <div class="flex items-center justify-center">
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">TOTAL LAPORAN MASUK</div>
         </div>
-        <div class="flex items-baseline gap-2">
+        <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['total'] ?? 0 }}</div>
-        </div>
-        <div class="flex justify-between items-center text-[10px] font-bold mt-2">
         </div>
     </div>
 
