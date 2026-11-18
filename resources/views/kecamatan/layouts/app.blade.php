@@ -273,11 +273,6 @@
                 <div class="text-left md:text-right">
                     <p class="text-xs font-semibold text-slate-200">Layanan Darurat Jalan Rusak:</p>
                     <p class="text-sm font-bold text-white mt-0.5">Call Center Kab. Jember: 112 / (021) 879-0123</p>
-                    <div class="flex items-center md:justify-end gap-3 text-[11px] text-slate-300 mt-2">
-                        <span>Standar Pelayanan Publik No. 201/KORD-UPR/2026</span>
-                        <span>•</span>
-                        <span class="font-mono bg-white/10 px-1.5 py-0.5 rounded border border-white/15 text-white">Versi 2.4.1</span>
-                    </div>
                 </div>
             </div>
         </div>
