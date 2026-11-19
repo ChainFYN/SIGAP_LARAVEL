@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
 
 class Report extends Model
 {
@@ -98,8 +97,9 @@ class Report extends Model
     public function getMaskedNikAttribute(): string
     {
         if (strlen($this->reporter_nik) >= 12) {
-            return substr($this->reporter_nik, 0, 12) . '****';
+            return substr($this->reporter_nik, 0, 12).'****';
         }
+
         return $this->reporter_nik;
     }
 }

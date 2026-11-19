@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Report;
 use App\Models\User;
 use App\Models\Village;
-use App\Models\Report;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
@@ -236,7 +236,7 @@ class DatabaseSeeder extends Seeder
                 ['ticket_number' => "LP-2026-{$num}"],
                 [
                     'title' => "Penanganan Perkerasan Ruas Sukamaju-jember #{$i}",
-                    'road_name' => 'Ruas Jl. Raya Sukamaju No. ' . ($i * 2),
+                    'road_name' => 'Ruas Jl. Raya Sukamaju No. '.($i * 2),
                     'subdistrict' => 'Kecamatan jember',
                     'village' => 'Desa Sukamaju',
                     'road_class' => 'Kolektor Primer',
@@ -248,9 +248,9 @@ class DatabaseSeeder extends Seeder
                     'latitude' => -6.480000 + ($i * 0.0005),
                     'longitude' => 106.840000 + ($i * 0.0004),
                     'gps_accuracy_m' => 10,
-                    'reporter_name' => 'Warga jember ' . $i,
-                    'reporter_nik' => '320101' . str_pad($i, 10, '0', STR_PAD_LEFT),
-                    'reporter_phone' => '0812-0000-' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                    'reporter_name' => 'Warga jember '.$i,
+                    'reporter_nik' => '320101'.str_pad($i, 10, '0', STR_PAD_LEFT),
+                    'reporter_phone' => '0812-0000-'.str_pad($i, 4, '0', STR_PAD_LEFT),
                     'reporter_address' => 'Kecamatan jember',
                     'reporter_reputation' => 95,
                     'photo_path' => $imgPothole,
@@ -273,7 +273,7 @@ class DatabaseSeeder extends Seeder
                 ['ticket_number' => "LP-2026-{$num}"],
                 [
                     'title' => "Pengaduan Jalan Desa Non-Kewenangan Kabupaten #{$j}",
-                    'road_name' => 'Gang Pribadi Warga No. ' . $j,
+                    'road_name' => 'Gang Pribadi Warga No. '.$j,
                     'subdistrict' => 'Kecamatan jember',
                     'village' => 'Kelurahan Cirimekar',
                     'road_class' => 'Non-Status',
@@ -285,9 +285,9 @@ class DatabaseSeeder extends Seeder
                     'latitude' => -6.485000,
                     'longitude' => 106.845000,
                     'gps_accuracy_m' => 18,
-                    'reporter_name' => 'Pelapor ' . $j,
-                    'reporter_nik' => '320101990000000' . $j,
-                    'reporter_phone' => '0813-1111-222' . $j,
+                    'reporter_name' => 'Pelapor '.$j,
+                    'reporter_nik' => '320101990000000'.$j,
+                    'reporter_phone' => '0813-1111-222'.$j,
                     'reporter_address' => 'Cirimekar',
                     'reporter_reputation' => 70,
                     'photo_path' => $imgRoad1,

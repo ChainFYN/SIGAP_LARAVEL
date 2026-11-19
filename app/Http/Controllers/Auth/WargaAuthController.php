@@ -34,31 +34,29 @@ class WargaAuthController extends Controller
             $user = Pengguna::where('email', $loginValue)->first();
         }
 
-       if ($user && Hash::check($request->password, $user->password)) {
-    if ($user->id_peran == 1) {
-        Session::put('warga_id', $user->id_pengguna);
-        Session::put('warga_name', $user->nama_lengkap);
+        if ($user && Hash::check($request->password, $user->password)) {
+            if ($user->id_peran == 1) {
+                Session::put('warga_id', $user->id_pengguna);
+                Session::put('warga_name', $user->nama_lengkap);
 
-        return redirect()->route('warga.dashboard');
-    } elseif ($user->id_peran == 3) {
-        Session::put('pupr_id', $user->id_pengguna);
-        Session::put('pupr_name', $user->nama_lengkap);
+                return redirect()->route('warga.dashboard');
+            } elseif ($user->id_peran == 3) {
+                Session::put('pupr_id', $user->id_pengguna);
+                Session::put('pupr_name', $user->nama_lengkap);
 
-        return redirect()->route('pupr.dashboard');
-    } elseif ($user->id_peran == 2) {
-        Session::put('kecamatan_id', $user->id_pengguna);
-        Session::put('kecamatan_name', $user->nama_lengkap);
+                return redirect()->route('pupr.dashboard');
+            } elseif ($user->id_peran == 2) {
+                Session::put('kecamatan_id', $user->id_pengguna);
+                Session::put('kecamatan_name', $user->nama_lengkap);
 
-        return redirect()->route('kecamatan.dashboard');
+                return redirect()->route('kecamatan.dashboard');
+            }
+
+            return back()->withErrors(['login' => 'Role tidak sesuai dengan akun Anda.']);
+        }
+
+        return back()->withErrors(['login' => 'NIK/Email atau password salah.']);
     }
-
-    return back()->withErrors(['login' => 'Role tidak sesuai dengan akun Anda.']);
-}
-
-return back()->withErrors(['login' => 'NIK/Email atau password salah.']);
-    }
-           
-    
 
     public function showRegisterForm()
     {

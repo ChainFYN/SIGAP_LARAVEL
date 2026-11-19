@@ -23,7 +23,7 @@ class LaporanResource extends JsonResource
             'tingkat_bahaya_badge' => $this->tingkat_bahaya_badge,
             'waktu_lapor' => $this->time_ago,
             'tanggal' => $this->created_at ? $this->created_at->format('d M Y, H:i') : null,
-            
+
             // Format koordinat GPS
             'koordinat' => [
                 'latitude' => $this->latitude ? (float) $this->latitude : null,

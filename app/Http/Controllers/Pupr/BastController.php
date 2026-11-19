@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Pupr;
 
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
-use App\Models\TimLapangan;
-use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 
 class BastController extends Controller
 {
@@ -27,7 +26,7 @@ class BastController extends Controller
 
         $pdf = Pdf::loadView('pupr.bast.pdf', compact('laporan'));
 
-        return $pdf->download('BAST_Laporan_' . $laporan->id_laporan . '.pdf');
+        return $pdf->download('BAST_Laporan_'.$laporan->id_laporan.'.pdf');
     }
 
     public function store(Request $request, $id)

@@ -48,13 +48,14 @@ class Pengguna extends Model
     {
         return Attribute::make(
             get: function () {
-                if (!$this->nik) {
+                if (! $this->nik) {
                     return null;
                 }
                 $len = strlen($this->nik);
                 if ($len >= 12) {
-                    return substr($this->nik, 0, 8) . '****' . substr($this->nik, -4);
+                    return substr($this->nik, 0, 8).'****'.substr($this->nik, -4);
                 }
+
                 return $this->nik;
             }
         );
@@ -67,13 +68,14 @@ class Pengguna extends Model
     {
         return Attribute::make(
             get: function () {
-                if (!$this->telepon) {
+                if (! $this->telepon) {
                     return null;
                 }
                 $len = strlen($this->telepon);
                 if ($len >= 8) {
-                    return substr($this->telepon, 0, 4) . '****' . substr($this->telepon, -3);
+                    return substr($this->telepon, 0, 4).'****'.substr($this->telepon, -3);
                 }
+
                 return $this->telepon;
             }
         );
@@ -91,6 +93,7 @@ class Pengguna extends Model
                 foreach (array_slice($words, 0, 2) as $w) {
                     $initials .= strtoupper(substr($w, 0, 1));
                 }
+
                 return $initials ?: 'U';
             }
         );

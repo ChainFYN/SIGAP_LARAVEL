@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class KategoriKerusakan extends Model
 {
     protected $table = 'kategori_kerusakan';
+
     protected $primaryKey = 'id_kategori';
+
     protected $fillable = ['nama_kategori'];
 
     public function laporan()

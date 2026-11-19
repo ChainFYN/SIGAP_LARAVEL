@@ -5,27 +5,6 @@
 @section('content')
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<!-- WELCOME BANNER -->
-<div class="bg-slate-900 rounded-2xl p-6 sm:p-8 text-white mb-6 shadow-sm relative overflow-hidden">
-    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Selamat Datang, {{ session('kecamatan_name', 'Admin Kecamatan') }}!
-            </h1>
-            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                Validasi laporan kerusakan jalan dari warga, teruskan ke PUPR, dan pantau perkembangan penanganannya di wilayah kecamatan Anda.
-            </p>
-        </div>
-        <div class="flex items-center gap-3 shrink-0">
-            <a href="{{ route('kecamatan.validation.index', ['tab' => 'pending']) }}"
-               class="px-5 py-3 rounded-xl bg-[#F5F5F5] saturate-50 hover:bg-[#f2ddd1] text-slate-900 font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-black/10">
-                <i class="fa-solid fa-clipboard-check"></i>
-                <span>Validasi Laporan</span>
-            </a>
-        </div>
-    </div>
-</div>
-
     <!-- TOP HEADER & TIME FILTER -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>

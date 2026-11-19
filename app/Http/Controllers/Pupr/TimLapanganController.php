@@ -43,21 +43,17 @@ class TimLapanganController extends Controller
 
         // Cari laporan aktif yang sedang ditangani oleh masing-masing tim
         foreach ($timLapangan as $tim) {
-            // Prioritaskan laporan dengan status aktif (1: Menunggu Validasi, 2: Diproses PUPR)
-            $activeLaporan = $tim->laporan->whereIn('id_status', [1, 2])->sortByDesc('created_at')->first();
+            // Prioritaskan laporan dengan status aktif (1: Menunggu Validasi, 2: Diproses PUPR yang belum selesai/diverifikasi BAST)
+            $activeLaporan = $tim->laporan
+                ->whereIn('id_status', [1, 2])
+                ->where('status_bast', '!=', 'DIVERIFIKASI')
+                ->sortByDesc('created_at')
+                ->first();
 
-            // Jika belum ada relasi di DB tapi status tim 'Di Lapangan', hubungkan dengan laporan yang belum bertim
+            // Jika tidak ada laporan aktif, pastikan tim berstatus Tersedia (Siaga) dan jangan masukkan laporan baru otomatis
             if (! $activeLaporan && $tim->status === 'Di Lapangan') {
-                $unassigned = Laporan::with(['kategori', 'jalan.desa.kecamatan', 'logProses', 'status', 'pengguna'])
-                    ->whereNull('id_tim')
-                    ->whereIn('id_status', [1, 2])
-                    ->orderBy('id_laporan', 'desc')
-                    ->first();
-
-                if ($unassigned) {
-                    $unassigned->update(['id_tim' => $tim->id_tim]);
-                    $activeLaporan = $unassigned;
-                }
+                $tim->update(['status' => 'Tersedia']);
+                $tim->status = 'Tersedia';
             }
 
             if ($activeLaporan) {
@@ -69,10 +65,16 @@ class TimLapanganController extends Controller
                 } elseif ($latestLog && preg_match('/Progres\s*(\d+)%/i', $latestLog->catatan_update, $matches)) {
                     $persen = (int) $matches[1];
                 } else {
-                    $persen = 25;
+                    $persen = 0;
                 }
 
                 $statusName = $activeLaporan->status->nama_status ?? 'Menunggu Validasi';
+                // Jika masih menunggu validasi (id_status == 1), buat progres menjadi 0%
+                if ($activeLaporan->id_status == 1) {
+                    $persen = 0;
+                    $statusName = 'Menunggu Validasi';
+                }
+
                 $activeLaporan->progres_persen = $persen;
                 $activeLaporan->label_status_penanganan = "{$persen}% - {$statusName}";
                 $tim->active_laporan = $activeLaporan;
@@ -88,20 +90,12 @@ class TimLapanganController extends Controller
         })->count();
         $timSiaga = max(0, $totalTim - $timPenugasan);
 
-        // Ambil daftar laporan untuk modal penugasan tim
+        // Ambil daftar laporan untuk modal penugasan tim (laporan yang belum memiliki tim penugasan)
         $laporanTersedia = Laporan::with(['jalan.desa.kecamatan', 'kategori'])
             ->whereIn('id_status', [1, 2])
             ->whereNull('id_tim')
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // Jika tidak ada laporan tanpa tim, tampilkan seluruh laporan aktif
-        if ($laporanTersedia->isEmpty()) {
-            $laporanTersedia = Laporan::with(['jalan.desa.kecamatan', 'kategori'])
-                ->whereIn('id_status', [1, 2])
-                ->orderBy('created_at', 'desc')
-                ->get();
-        }
 
         return view('pupr.tim-lapangan.index', compact(
             'timLapangan',
@@ -133,12 +127,48 @@ class TimLapanganController extends Controller
             'id_pengguna' => session('pupr_id'),
             'id_tim' => $tim->id_tim,
             'id_status' => 2,
-            'catatan_update' => 'Penugasan ' . $tim->nama_tim . ' ke ruas jalan.',
+            'catatan_update' => 'Penugasan '.$tim->nama_tim.' ke ruas jalan.',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        $kodeTiket = 'LP-' . ($laporan->created_at ? $laporan->created_at->format('Y') : date('Y')) . '-' . str_pad($laporan->id_laporan, 4, '0', STR_PAD_LEFT);
+        $kodeTiket = 'LP-'.($laporan->created_at ? $laporan->created_at->format('Y') : date('Y')).'-'.str_pad($laporan->id_laporan, 4, '0', STR_PAD_LEFT);
+
+        return back()->with('success', "{$tim->nama_tim} berhasil ditugaskan untuk penanganan {$kodeTiket}.");
+    }
+
+    public function tugaskanLaporan(Request $request, $id)
+    {
+        $request->validate([
+            'id_tim' => 'required|exists:tim_lapangan,id_tim',
+        ]);
+
+        $tim = TimLapangan::findOrFail($request->id_tim);
+
+        if ($tim->status !== 'Tersedia') {
+            return back()->with('error', "{$tim->nama_tim} saat ini tidak tersedia atau sedang bertugas.");
+        }
+
+        $laporan = Laporan::findOrFail($id);
+
+        $tim->update(['status' => 'Di Lapangan']);
+
+        $laporan->update([
+            'id_tim' => $tim->id_tim,
+            'id_status' => 2, // Diproses PUPR
+        ]);
+
+        DB::table('log_proses')->insert([
+            'id_laporan' => $laporan->id_laporan,
+            'id_pengguna' => session('pupr_id'),
+            'id_tim' => $tim->id_tim,
+            'id_status' => 2,
+            'catatan_update' => 'Penugasan '.$tim->nama_tim.' ke ruas jalan dari Dashboard PUPR.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $kodeTiket = 'LP-'.($laporan->created_at ? $laporan->created_at->format('Y') : date('Y')).'-'.str_pad($laporan->id_laporan, 4, '0', STR_PAD_LEFT);
 
         return back()->with('success', "{$tim->nama_tim} berhasil ditugaskan untuk penanganan {$kodeTiket}.");
     }

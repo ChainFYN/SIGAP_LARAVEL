@@ -27,7 +27,7 @@ class DashboardController extends Controller
             };
         };
 
-        $laporanQuery = Laporan::with(['kategori', 'jalan.desa.kecamatan', 'pengguna', 'logProses'])
+        $laporanQuery = Laporan::with(['kategori', 'jalan.desa.kecamatan', 'pengguna', 'logProses', 'timLapangan'])
             ->where(function ($q) {
                 $q->where('id_status', 2)
                     ->orWhere('id_status', 3);
@@ -75,7 +75,8 @@ class DashboardController extends Controller
         $selesaiCount = $laporan_diproses->where('tahap_progres', 'selesai')->count();
 
         $timLapangan = TimLapangan::all();
-        $timTersediaCount = $timLapangan->where('status', 'Tersedia')->count();
+        $timTersedia = $timLapangan->where('status', 'Tersedia');
+        $timTersediaCount = $timTersedia->count();
 
         $menungguCamat = $applyTimeFilter(Laporan::where('id_status', 1))->count()
             + $applyTimeFilter(Laporan::where('status_bast', 'MENUNGGU_VERIFIKASI'))->count();
@@ -105,6 +106,8 @@ class DashboardController extends Controller
             'diprosesCount' => $diprosesCount,
             'selesaiCount' => $selesaiCount,
             'timLapangan' => $timLapangan,
+            'timTersedia' => $timTersedia,
+            'timTersediaCount' => $timTersediaCount,
             'timeFilter' => $timeFilter,
             'filterLabel' => $filterLabel,
             'statistik' => [

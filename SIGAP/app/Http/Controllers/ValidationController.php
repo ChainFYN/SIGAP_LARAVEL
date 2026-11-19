@@ -16,12 +16,12 @@ class ValidationController extends Controller
 
         $query = Report::query();
 
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
-                  ->orWhere('road_name', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%")
-                  ->orWhere('reporter_name', 'like', "%{$search}%");
+                    ->orWhere('road_name', 'like', "%{$search}%")
+                    ->orWhere('title', 'like', "%{$search}%")
+                    ->orWhere('reporter_name', 'like', "%{$search}%");
             });
         }
 
@@ -46,7 +46,7 @@ class ValidationController extends Controller
 
         // Active ticket for the right detail panel
         $activeTicket = Report::where('ticket_number', $selectedTicketNumber)->first();
-        if (!$activeTicket && $tickets->isNotEmpty()) {
+        if (! $activeTicket && $tickets->isNotEmpty()) {
             $activeTicket = $tickets->first();
         }
 

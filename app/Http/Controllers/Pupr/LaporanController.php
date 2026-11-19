@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use App\Models\TimLapangan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class LaporanController extends Controller
 {

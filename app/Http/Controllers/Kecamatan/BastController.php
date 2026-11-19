@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use App\Models\LogProses;
 use App\Models\Pengguna;
+use App\Models\TimLapangan;
 use App\Notifications\LaporanPUPRNotification;
 use App\Notifications\LaporanWargaNotification;
 use Illuminate\Http\Request;
@@ -104,6 +105,11 @@ class BastController extends Controller
                 'catatan_bast' => $catatan ?: 'Telah dilakukan uji petik lapangan dan disetujui BAST.',
                 'tgl_verifikasi_bast' => now(),
             ]);
+
+            // Kembalikan status tim lapangan menjadi Tersedia (Siaga)
+            if ($laporan->id_tim) {
+                TimLapangan::where('id_tim', $laporan->id_tim)->update(['status' => 'Tersedia']);
+            }
 
             LogProses::create([
                 'id_laporan' => $laporan->id_laporan,

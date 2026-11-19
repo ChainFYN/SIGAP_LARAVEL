@@ -1,10 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\MasterDataController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +19,6 @@ Route::post('/register', [AuthController::class, 'register']);
 // Wilayah untuk Form Register Calon Warga di Flutter
 Route::get('/kecamatan', [MasterDataController::class, 'kecamatan']);
 Route::get('/desa', [MasterDataController::class, 'desa']);
-
 
 /*
 |--------------------------------------------------------------------------

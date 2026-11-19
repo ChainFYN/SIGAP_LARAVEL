@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\Kecamatan;
-use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Models\Village;
 use Carbon\Carbon;
@@ -34,8 +34,8 @@ class ReportController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
-                  ->orWhere('road_name', 'like', "%{$search}%")
-                  ->orWhere('reporter_name', 'like', "%{$search}%");
+                    ->orWhere('road_name', 'like', "%{$search}%")
+                    ->orWhere('reporter_name', 'like', "%{$search}%");
             });
         }
 
@@ -80,6 +80,7 @@ class ReportController extends Controller
     public function masterDesa()
     {
         $villages = Village::withCount('reports')->get();
+
         return view('kecamatan.reports.master_desa', compact('villages'));
     }
 
@@ -89,6 +90,7 @@ class ReportController extends Controller
     public function gisMap()
     {
         $reports = Report::all();
+
         return view('kecamatan.reports.gis_map', compact('reports'));
     }
 
@@ -98,6 +100,7 @@ class ReportController extends Controller
     public function printBap($id)
     {
         $report = Report::findOrFail($id);
+
         return view('kecamatan.reports.print_bap', compact('report'));
     }
 
@@ -109,6 +112,7 @@ class ReportController extends Controller
         $reports = Report::where('status', 'diteruskan_pupr')
             ->orderBy('verified_at', 'desc')
             ->get();
+
         return view('kecamatan.reports.export_bap', compact('reports'));
     }
 
@@ -118,6 +122,7 @@ class ReportController extends Controller
     public function create()
     {
         $villages = Village::all();
+
         return view('kecamatan.reports.create', compact('villages'));
     }
 
@@ -143,7 +148,7 @@ class ReportController extends Controller
         // Generate Ticket Number: LP-2026-XXXX
         $lastReport = Report::latest('id')->first();
         $nextId = $lastReport ? $lastReport->id + 1 : 1;
-        $ticketNumber = 'LP-2026-' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
+        $ticketNumber = 'LP-2026-'.str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
         $slaHours = match ($validated['urgency']) {
             'darurat' => 2,
@@ -161,7 +166,7 @@ class ReportController extends Controller
 
         $report = Report::create([
             'ticket_number' => $ticketNumber,
-            'title' => $validated['road_name'] . ' (' . $validated['village'] . ')',
+            'title' => $validated['road_name'].' ('.$validated['village'].')',
             'road_name' => $validated['road_name'],
             'subdistrict' => 'Kecamatan jember',
             'village' => $validated['village'],

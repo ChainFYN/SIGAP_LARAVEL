@@ -43,7 +43,7 @@ class SigapPortalTest extends TestCase
         $report = Report::where('status', 'menunggu_validasi')->first();
         $this->assertNotNull($report);
 
-        $response = $this->post('/validasi/' . $report->id, [
+        $response = $this->post('/validasi/'.$report->id, [
             'action' => 'acc',
             'pupr_priority' => 'PRIORITAS 1 - DARURAT (SLA Penanganan 48 Jam)',
             'technical_estimate' => 'Penambalan Aspal Dingin/Hotmix (Patching)',
@@ -91,7 +91,7 @@ class SigapPortalTest extends TestCase
     public function test_print_bap_page_loads(): void
     {
         $report = Report::first();
-        $response = $this->get('/cetak-bap/' . $report->id);
+        $response = $this->get('/cetak-bap/'.$report->id);
         $response->assertStatus(200);
         $response->assertSee('BERITA ACARA PEMERIKSAAN');
         $response->assertSee('PEMERINTAH KABUPATEN JEMBER');

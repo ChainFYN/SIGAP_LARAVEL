@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Validasi extends Model
 {
     protected $table = 'validasi';
+
     protected $primaryKey = 'id_validasi';
+
     protected $fillable = ['id_laporan', 'id_pengguna', 'status_valid', 'catatan'];
 
     public function laporan()

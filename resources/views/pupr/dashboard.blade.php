@@ -5,27 +5,6 @@
 @section('content')
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<!-- WELCOME BANNER -->
-<div class="bg-slate-900 rounded-2xl p-6 sm:p-8 text-white mb-6 shadow-sm relative overflow-hidden">
-    <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                Selamat Datang, {{ session('pupr_name', 'Admin PUPR') }}!
-            </h1>
-            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-                Tindak lanjuti laporan yang sudah divalidasi kecamatan, tugaskan tim lapangan, dan perbarui progres perbaikan jalan secara transparan.
-            </p>
-        </div>
-        <div class="flex items-center gap-3 shrink-0">
-            <a href="{{ route('pupr.laporan.index') }}"
-               class="px-5 py-3 rounded-xl bg-[#F5F5F5] saturate-50 hover:bg-[#f2ddd1] text-slate-900 font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-lg shadow-black/10">
-                <i class="fa-solid fa-list-check"></i>
-                <span>Lihat Laporan Masuk</span>
-            </a>
-        </div>
-    </div>
-</div>
-
     <!-- TOP HEADER & TIME FILTER -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
@@ -54,6 +33,29 @@
             </button>
         </div>
     </div>
+
+    @if(session('success'))
+        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between shadow-xs">
+            <div class="flex items-center gap-2.5">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+                <span>{{ session('error') }}</span>
+            </div>
+            <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    @endif
 
     <!-- DASHBOARD CONTENT (UPDATED VIA AJAX WITHOUT RELOAD) -->
     <div id="pupr-dashboard-content">

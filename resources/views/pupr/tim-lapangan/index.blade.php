@@ -124,9 +124,22 @@
 
                                 <!-- STATUS PENANGANAN -->
                                 <td class="py-5 px-6 text-center">
-                                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-300 bg-[#fffdf0] text-amber-800 text-xs font-semibold shadow-2xs">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                        {{ $laporan->label_status_penanganan ?? '25% - Menunggu Validasi' }}
+                                    @php
+                                        $persenPenanganan = $laporan->progres_persen ?? 0;
+                                        if ($persenPenanganan >= 100) {
+                                            $badgeCls = 'border-emerald-300 bg-[#f0fdf4] text-emerald-800';
+                                            $dotCls = 'bg-emerald-500';
+                                        } elseif ($persenPenanganan > 0) {
+                                            $badgeCls = 'border-amber-300 bg-[#fffdf0] text-amber-800';
+                                            $dotCls = 'bg-amber-500';
+                                        } else {
+                                            $badgeCls = 'border-blue-200 bg-blue-50 text-blue-700';
+                                            $dotCls = 'bg-blue-500';
+                                        }
+                                    @endphp
+                                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border {{ $badgeCls }} text-xs font-semibold shadow-2xs">
+                                        <span class="w-1.5 h-1.5 rounded-full {{ $dotCls }}"></span>
+                                        {{ $laporan->label_status_penanganan ?? '0% - Menunggu Validasi' }}
                                     </span>
                                 </td>
 

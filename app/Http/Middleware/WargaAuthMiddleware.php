@@ -15,9 +15,10 @@ class WargaAuthMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!session()->has('warga_id')) {
+        if (! session()->has('warga_id')) {
             return redirect()->route('warga.login')->with('error', 'Silakan login terlebih dahulu.');
         }
+
         return $next($request);
     }
 }

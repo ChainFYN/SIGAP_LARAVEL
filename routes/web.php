@@ -88,6 +88,8 @@ Route::prefix('pupr')->name('pupr.')->group(function () {
     Route::get('/progres', [ProgresController::class, 'index'])->name('progres.index');
     Route::get('/progres/{id}', [ProgresController::class, 'show'])->name('progres.show');
     Route::post('/progres/{id}', [ProgresController::class, 'update'])->name('progres.update');
+    Route::post('/laporan/{id}/tugaskan-tim', [TimLapanganController::class, 'tugaskanLaporan'])->name('laporan.tugaskan-tim');
+
     // Tim Lapangan Routes
     Route::get('/tim-lapangan', [TimLapanganController::class, 'index'])->name('tim-lapangan.index');
     Route::post('/tim-lapangan/{id}/tugaskan', [TimLapanganController::class, 'tugaskan'])->name('tim-lapangan.tugaskan');
