@@ -39,11 +39,30 @@ Route::middleware('auth:sanctum')->group(function () {
     // Manajemen Laporan Warga (Wajib Login)
     Route::get('/laporan', [LaporanController::class, 'index']);
     Route::post('/laporan', [LaporanController::class, 'store']);
-    Route::get('/laporan/{id}', [LaporanController::class, 'show']); // <-- Pindah ke sini
+    Route::get('/laporan/{id}', [LaporanController::class, 'show']);
+
+    // Notifikasi Warga di Flutter
+    Route::get('/notifications', function (Request $request) {
+        $notifications = $request->user()->notifications()->take(20)->get();
+        $unreadCount = $request->user()->unreadNotifications()->count();
+        return response()->json([
+            'success' => true,
+            'unread_count' => $unreadCount,
+            'data' => $notifications,
+        ]);
+    });
+
+    Route::post('/notifications/{id}/read', function (Request $request, $id) {
+        $notification = $request->user()->notifications()->where('id', $id)->first();
+        if ($notification) {
+            $notification->markAsRead();
+        }
+        return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca.']);
+    });
+
+    Route::post('/notifications/read-all', function (Request $request) {
+        $request->user()->unreadNotifications->markAsRead();
+        return response()->json(['success' => true, 'message' => 'Semua notifikasi ditandai dibaca.']);
+    });
 
 });
-
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');

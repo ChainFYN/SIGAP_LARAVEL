@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard Admin Kecamatan') -SIGAP Kab. Jember</title>
+    <title>@yield('title', 'Dashboard Admin Kecamatan') - SIGAP Kab. Jember</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,7 +108,7 @@
     @stack('styles')
 </head>
 
-<body class="h-full flex flex-col text-slate-800 antialiased" x-data="{ searchModalOpen: false, notifOpen: false }">
+<body class="h-full flex flex-col text-slate-800 antialiased" x-data="{ searchModalOpen: false }">
 
     <!-- TOP NAVBAR -->
     <header class="navy-gradient border-b border-white/10 sticky top-0 z-40 shadow-[0_8px_24px_rgba(20,30,113,0.12)] no-print">
@@ -136,7 +136,6 @@
                         <a href="{{ route('kecamatan.validation.index') }}"
                             class="px-3.5 py-2 text-sm font-semibold rounded-lg transition-all relative flex items-center gap-2 {{ request()->routeIs('validation.*') ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-200 hover:text-white hover:bg-white/10' }}">
                             <span>Validasi Laporan</span>
-
                         </a>
                         @php
                             $bastBadgeCount = \App\Models\Laporan::where('status_bast', 'MENUNGGU_VERIFIKASI')->count();
@@ -148,7 +147,6 @@
                                 <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-slate-900 bg-amber-400 rounded">{{ $bastBadgeCount }} Baru</span>
                             @endif
                         </a>
-
                     </nav>
                 </div>
 
@@ -156,87 +154,86 @@
                 <div class="flex items-center gap-5">
 
                     <!-- Notification Bell Dropdown -->
+                    @php
+                        $currentKecamatan = \App\Models\Pengguna::find(session('kecamatan_id'));
+                        $unreadKecNotifs = $currentKecamatan ? $currentKecamatan->unreadNotifications()->take(5)->get() : collect();
+                        $unreadKecCount = $unreadKecNotifs->count();
+                    @endphp
                     <div class="relative" x-data="{ notifOpen: false }">
                         <button @click="notifOpen = !notifOpen"
-                            class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 relative transition-colors">
+                            class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 relative transition-colors focus:outline-none">
                             <i class="fa-regular fa-bell text-lg"></i>
-                            <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-500 border-2 border-white rounded-full"></span>
+                            @if($unreadKecCount > 0)
+                                <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse">
+                                    {{ $unreadKecCount }}
+                                </span>
+                            @endif
                         </button>
 
                         <!-- Notification Dropdown -->
                         <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
-                            class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                            <div class="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
-                                <span class="text-xs font-bold text-slate-900 uppercase tracking-wider">Notifikasi Masuk (3)</span>
-                                <span class="text-[11px] text-emerald-600 font-semibold cursor-pointer hover:underline">Tandai Dibaca</span>
-                            </div>
-                            <div class="divide-y divide-slate-100 max-h-72 overflow-y-auto custom-scrollbar">
-                                <a href="{{ route('kecamatan.validation.index', ['ticket' => 'LP-2026-0842']) }}" class="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                                    <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                                        <i class="fa-solid fa-triangle-exclamation text-xs"></i>
-                                    </div>
-                                    <div class="text-xs">
-                                        <p class="font-semibold text-slate-800">Aduan Kritis: Longsor Tebing</p>
-                                        <p class="text-slate-500 text-[11px] truncate">Jl. Raya Cikaret KM 2 butuh respon UPT</p>
-                                        <span class="text-[10px] text-slate-400 mt-1 block">15 menit lalu • SLA Sisa 2 Jam</span>
-                                    </div>
-                                </a>
-                                <a href="{{ route('kecamatan.validation.index', ['ticket' => 'LP-2026-0841']) }}" class="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                                    <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                                        <i class="fa-solid fa-road-barrier text-xs"></i>
-                                    </div>
-                                    <div class="text-xs">
-                                        <p class="font-semibold text-slate-800">Lubang Jalan Dalam >15cm</p>
-                                        <p class="text-slate-500 text-[11px] truncate">Jl. Raya Mayor Oking No. 42</p>
-                                        <span class="text-[10px] text-slate-400 mt-1 block">40 menit lalu • Menunggu Verifikasi</span>
-                                    </div>
-                                </a>
-                                <div class="flex gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                                        <i class="fa-solid fa-arrows-rotate text-xs"></i>
-                                    </div>
-                                    <div class="text-xs">
-                                        <p class="font-semibold text-slate-800">Sinkronisasi Dinas PUPR Berhasil</p>
-                                        <p class="text-slate-500 text-[11px]">42 data aduan tersinkronisasi ke server UPT</p>
-                                        <span class="text-[10px] text-slate-400 mt-1 block">Hari ini, 11:42 WIB</span>
-                                    </div>
+                            class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden text-slate-800">
+                            <div class="px-4 pb-3 border-b border-slate-100 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Masuk</span>
+                                    @if($unreadKecCount > 0)
+                                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unreadKecCount }} baru</span>
+                                    @endif
                                 </div>
+                                @if($unreadKecCount > 0)
+                                    <form action="{{ route('kecamatan.notifications.read-all') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                                            Tandai Dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                            <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
+                                @forelse($unreadKecNotifs as $notif)
+                                    <form action="{{ route('kecamatan.notifications.read', $notif->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+                                            <!-- Icon Tipe -->
+                                            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 {{ ($notif->data['tipe'] ?? '') === 'pengajuan_bast' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' }}">
+                                                <i class="fa-solid {{ ($notif->data['tipe'] ?? '') === 'pengajuan_bast' ? 'fa-clipboard-check' : 'fa-bullhorn' }} text-xs"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
+                                                <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
+                                                <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                            </div>
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="py-8 text-center text-slate-400">
+                                        <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                                        <p class="text-xs font-medium">Tidak ada notifikasi baru</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
                     </div>
 
-                    
-                   <!-- User Profile Badge & Logout -->
-                    <div class="flex items-center gap-3 pl-5 border-l border-slate-200">
-                        <div class="text-right hidden sm:block text-slate-900">
+                    <!-- User Profile Badge & Logout -->
+                    <div class="flex items-center gap-3 pl-5 border-l border-white/20">
+                        <div class="text-right hidden sm:block">
                             <div class="text-xs font-extrabold text-white">{{ session('kecamatan_name', 'Kecamatan') }}</div>
                             <div class="text-[10px] text-slate-200 font-medium">Admin<br>Kecamatan Jember</div>
                         </div>
-                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
                             <i class="fa-regular fa-user"></i>
                         </div>
 
                         <form method="POST" action="{{ route('kecamatan.logout') }}"
-                        class="flex items-center"
-                        onsubmit="return confirm('Apakah Anda yakin ingin keluar dari akun Kecamatan?')">
-                         @csrf
-                          <button type="submit" title="Keluar / Logout"
-                            class="flex items-center justify-center w-10 h-10 text-slate-100 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-                             <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
-                          </button>
+                            class="flex items-center"
+                            onsubmit="return confirm('Apakah Anda yakin ingin keluar dari akun Kecamatan?')">
+                            @csrf
+                            <button type="submit" title="Keluar / Logout"
+                                class="flex items-center justify-center w-10 h-10 text-slate-200 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                            </button>
                         </form>
-                    </div>
-
-                        <!-- Profile Dropdown -->
-                        <div x-show="profileOpen" @click.away="profileOpen = false" x-cloak
-                            class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                            <form method="POST" action="{{ route('kecamatan.logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 font-semibold hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2">
-                                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar
-                                </button>
-                            </form>
-                        </div>
                     </div>
 
                 </div>

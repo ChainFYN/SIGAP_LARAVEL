@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full" style="background-color: #F8F5F4;">
+<html lang="id" class="h-full bg-slate-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard Admin Kecamatan')</title>
-    <meta name="theme-color" content="#141E71">
-    <meta name="csrf-token"
+    <title>@yield('title', 'Portal Pelaporan Warga') - SIGAP Kab. Jember</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,25 +21,18 @@
                     },
                     colors: {
                         brand: {
-                            50: '#F3F8FF',
-                            100: '#C0EEF4',
-                            500: '#69A4F9',
-                            600: '#3B4AE9',
-                            700: '#141E71',
-                            800: '#101C5A',
-                            900: '#0A143F',
-                        },
-                        slate: {
-                            50: '#F5F9FF',
-                            800: '#1A2D66',
-                            900: '#141E71',
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
                         },
                         navy: {
-                            100: '#C0EEF4',
-                            300: '#69A4F9',
-                            500: '#3B4AE9',
-                            700: '#141E71',
-                            900: '#0B173F',
+                            800: '#0f172a',
+                            900: '#0b1329',
+                            950: '#050a18',
                         },
                         sigap: {
                             teal: '#0d9488',
@@ -55,6 +46,10 @@
 
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet GIS CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
@@ -131,6 +126,73 @@
                 <!-- Right: Profile & Actions -->
                 <div class="flex items-center gap-4">
                     @if(Session::has('warga_id'))
+                        @php
+                            $currentWarga = \App\Models\Pengguna::find(session('warga_id'));
+                            $unreadWargaNotifs = $currentWarga ? $currentWarga->unreadNotifications()->take(5)->get() : collect();
+                            $unreadWargaCount = $unreadWargaNotifs->count();
+                        @endphp
+                        <!-- Warga Notification Bell -->
+                        <div class="relative" x-data="{ notifOpen: false }">
+                            <button @click="notifOpen = !notifOpen"
+                                class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 relative transition-colors focus:outline-none">
+                                <i class="fa-regular fa-bell text-lg"></i>
+                                @if($unreadWargaCount > 0)
+                                    <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse">
+                                        {{ $unreadWargaCount }}
+                                    </span>
+                                @endif
+                            </button>
+
+                            <!-- Notification Dropdown -->
+                            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
+                                class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden text-slate-800">
+                                <div class="px-4 pb-3 border-b border-slate-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Saya</span>
+                                        @if($unreadWargaCount > 0)
+                                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unreadWargaCount }} baru</span>
+                                        @endif
+                                    </div>
+                                    @if($unreadWargaCount > 0)
+                                        <form action="{{ route('warga.notifications.read-all') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                                                Tandai Dibaca
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                                <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
+                                    @forelse($unreadWargaNotifs as $notif)
+                                        <form action="{{ route('warga.notifications.read', $notif->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="w-full text-left p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+                                                <!-- Icon Tipe -->
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 
+                                                    {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'bg-emerald-100 text-emerald-600' : 
+                                                       (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600') }}">
+                                                    <i class="fa-solid 
+                                                        {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'fa-circle-check' : 
+                                                           (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'fa-circle-xmark' : 'fa-wrench') }} text-xs"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
+                                                    <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
+                                                    <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                                </div>
+                                            </button>
+                                        </form>
+                                    @empty
+                                        <div class="py-8 text-center text-slate-400">
+                                            <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                                            <p class="text-xs font-medium">Belum ada notifikasi baru</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Profile Badge & Logout -->
                         <div class="flex items-center gap-3 pl-4 border-l border-white/20">
                             <div class="text-right hidden sm:block">
                                 <div class="text-xs font-extrabold text-white">{{ session('warga_name', 'Warga Pelapor') }}</div>

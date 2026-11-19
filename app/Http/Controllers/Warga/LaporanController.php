@@ -8,7 +8,10 @@ use App\Models\Jalan;
 use App\Models\KategoriKerusakan;
 use App\Models\Kecamatan;
 use App\Models\Laporan;
+use App\Models\Pengguna;
+use App\Notifications\LaporanKecamatanNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 
 class LaporanController extends Controller
@@ -91,7 +94,7 @@ class LaporanController extends Controller
             $fotoPath = $request->file('foto')->store('laporan', 'public');
         }
 
-        Laporan::create([
+        $laporan = Laporan::create([
             'id_pengguna' => $wargaId,
             'id_jalan' => $request->id_jalan,
             'id_kategori' => $request->id_kategori,
@@ -102,6 +105,19 @@ class LaporanController extends Controller
             'longitude' => $request->longitude,
             'url_foto' => $fotoPath,
         ]);
+
+        // Muat relasi jalan untuk pesan notifikasi yang informatif
+        $laporan->load('jalan');
+
+        // Kirim notifikasi laporan baru ke pihak Kecamatan (id_peran = 2)
+        $petugasKecamatan = Pengguna::where('id_peran', 2)->get();
+        Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
+            'laporan_baru',
+            'Laporan Baru Masuk',
+            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di " . ($laporan->jalan->nama_jalan ?? 'wilayah desa') . ".",
+            $laporan->id_laporan,
+            route('kecamatan.validation.index', ['ticket' => $laporan->id_laporan])
+        ));
 
         return redirect()->route('warga.laporan.index')->with('success', 'Laporan berhasil dikirim dan masuk dalam antrean verifikasi!');
     }

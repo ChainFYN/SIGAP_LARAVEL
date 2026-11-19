@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Pupr;
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use App\Models\LogProses;
+use App\Models\Pengguna;
+use App\Notifications\LaporanKecamatanNotification;
+use App\Notifications\LaporanWargaNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class ProgresController extends Controller
 {
@@ -69,7 +73,7 @@ class ProgresController extends Controller
             'target_selesai' => 'nullable|date',
         ]);
 
-        $laporan = Laporan::findOrFail($id);
+        $laporan = Laporan::with(['jalan', 'pengguna'])->findOrFail($id);
         $persen = (int) ($request->persentase_capaian ?? 0);
 
         $tahapanName = match ($persen) {
@@ -134,10 +138,31 @@ class ProgresController extends Controller
 
         LogProses::create($logData);
 
+        // Kirim notifikasi update progres pengerjaan ke Warga pelapor
+        if ($laporan->pengguna) {
+            $laporan->pengguna->notify(new LaporanWargaNotification(
+                'progres_update',
+                "Update Progres: {$persen}% ({$tahapanName})",
+                "Pengerjaan jalan di " . ($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda') . " telah mencapai {$persen}%: {$tahapanName}.",
+                $laporan->id_laporan,
+                route('warga.laporan.show', $laporan->id_laporan)
+            ));
+        }
+
         if ($persen === 100) {
             $laporan->id_status = 2; // Tetap Diproses sampai BAST diverifikasi Camat
             $laporan->status_bast = 'MENUNGGU_VERIFIKASI';
             $laporan->save();
+
+            // Kirim notifikasi pengajuan BAST ke Kecamatan/Camat (id_peran = 2)
+            $petugasKecamatan = Pengguna::where('id_peran', 2)->get();
+            Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
+                'pengajuan_bast',
+                'Pengajuan BAST (Fisik 100%)',
+                "PUPR telah merampungkan fisik 100% untuk Laporan #LP-{$laporan->id_laporan}. Menunggu verifikasi BAST Camat.",
+                $laporan->id_laporan,
+                route('kecamatan.bast.index', ['ticket' => $laporan->id_laporan])
+            ));
 
             return redirect()->route('pupr.dashboard')->with('success', 'Laporan telah diselesaikan 100% dan berkas dikirim ke BAST Kecamatan (Menunggu Verifikasi Camat).');
         }

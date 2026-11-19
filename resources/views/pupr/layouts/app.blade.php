@@ -89,13 +89,75 @@
                     </nav>
                 </div>
 
+
+
                 <!-- Right: User Profile -->
                 <div class="flex items-center gap-5">
-                    <div class="relative">
-                        <button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    @php
+                        $currentPupr = \App\Models\Pengguna::find(session('pupr_id'));
+                        $unreadNotifs = $currentPupr ? $currentPupr->unreadNotifications()->take(5)->get() : collect();
+                        $unreadCount = $unreadNotifs->count();
+                    @endphp
+                    <div class="relative" x-data="{ notifOpen: false }">
+                        <button @click="notifOpen = !notifOpen"
+                                class="relative w-10 h-10 flex items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors focus:outline-none">
                             <i class="fa-regular fa-bell text-lg"></i>
+                            @if($unreadCount > 0)
+                                <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-slate-900 animate-pulse">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
                         </button>
-                        <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-500 border-2 border-white rounded-full"></span>
+
+                        <!-- Dropdown Panel -->
+                        <div x-show="notifOpen"
+                             @click.away="notifOpen = false"
+                             x-cloak
+                             class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden">
+
+                            <!-- Header Notifikasi -->
+                            <div class="flex items-center justify-between px-4 pb-3 border-b border-slate-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-slate-900 text-sm">Notifikasi</span>
+                                    @if($unreadCount > 0)
+                                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unreadCount }} baru</span>
+                                    @endif
+                                </div>
+                                @if($unreadCount > 0)
+                                    <form action="{{ route('pupr.notifications.read-all') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                                            Tandai semua dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <!-- Daftar Notifikasi -->
+                            <div class="divide-y divide-slate-50 max-h-80 overflow-y-auto">
+                                @forelse($unreadNotifs as $notif)
+                                    <form action="{{ route('pupr.notifications.read', $notif->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+                                            <!-- Icon Tipe -->
+                                            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 {{ ($notif->data['tipe'] ?? '') === 'bast_ditolak' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600' }}">
+                                                <i class="fa-solid {{ ($notif->data['tipe'] ?? '') === 'bast_ditolak' ? 'fa-triangle-exclamation' : 'fa-hard-hat' }} text-xs"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
+                                                <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
+                                                <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                            </div>
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="py-8 text-center text-slate-400">
+                                        <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                                        <p class="text-xs font-medium">Tidak ada notifikasi baru</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                        </div>
                     </div>
 
                     <!-- User Profile & Logout -->

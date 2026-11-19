@@ -4,11 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Pengguna extends Model
 {
-    use HasApiTokens;
+    use HasApiTokens, Notifiable;
 
     protected $table = 'pengguna';
 

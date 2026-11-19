@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Kecamatan;
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
 use App\Models\LogProses;
+use App\Models\Pengguna;
+use App\Notifications\LaporanPUPRNotification;
+use App\Notifications\LaporanWargaNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 
 class BastController extends Controller
@@ -87,7 +91,7 @@ class BastController extends Controller
 
     public function update(Request $request, $id)
     {
-        $laporan = Laporan::findOrFail($id);
+        $laporan = Laporan::with(['jalan', 'pengguna'])->findOrFail($id);
         $action = $request->input('action', 'acc');
         $catatan = trim((string) $request->input('catatan', ''));
         $kecamatanId = Session::get('kecamatan_id') ?? 1;
@@ -108,6 +112,27 @@ class BastController extends Controller
                 'catatan_update' => 'BAST diverifikasi Camat & diterbitkan ke warga. Catatan: '.($catatan ?: 'Lolos uji petik & spesifikasi teknis.'),
             ]);
 
+            // 1. Notifikasi ke Petugas PUPR bahwa BAST disetujui resmi
+            $petugasPupr = Pengguna::where('id_peran', 3)->get();
+            Notification::send($petugasPupr, new LaporanPUPRNotification(
+                'bast_disetujui',
+                'BAST Diverifikasi Camat (Selesai)',
+                "BAST Laporan #LP-{$laporan->id_laporan} di " . ($laporan->jalan->nama_jalan ?? 'jalan desa') . " telah diverifikasi & disetujui oleh Camat.",
+                $laporan->id_laporan,
+                route('pupr.riwayat', ['status' => '100'])
+            ));
+
+            // 2. Notifikasi ke Warga Pelapor bahwa jalan selesai diperbaiki
+            if ($laporan->pengguna) {
+                $laporan->pengguna->notify(new LaporanWargaNotification(
+                    'laporan_selesai',
+                    'Jalan Selesai Diperbaiki & BAST Sah',
+                    "Kabar baik! Perbaikan jalan di " . ($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda') . " telah selesai 100% dan disahkan melalui BAST.",
+                    $laporan->id_laporan,
+                    route('warga.laporan.show', $laporan->id_laporan)
+                ));
+            }
+
             return redirect()->route('kecamatan.bast.index')
                 ->with('status', "BAST untuk Laporan #{$laporan->id_laporan} berhasil diverifikasi & dikirim ke warga!")
                 ->with('status_type', 'success');
@@ -119,6 +144,16 @@ class BastController extends Controller
                 'catatan_bast' => $catatan ?: 'Diminta perbaikan minor oleh Kecamatan.',
                 'tgl_verifikasi_bast' => now(),
             ]);
+
+            // KIRIM NOTIFIKASI KE PETUGAS PUPR
+            $petugasPupr = Pengguna::where('id_peran', 3)->get();
+            Notification::send($petugasPupr, new LaporanPUPRNotification(
+                'bast_ditolak',
+                'BAST Ditolak (Perlu Perbaikan)',
+                "Laporan #LP-{$laporan->id_laporan} perlu perbaikan: " . ($catatan ?: 'Perbaikan minor belum sesuai.'),
+                $laporan->id_laporan,
+                route('pupr.progres.show', $laporan->id_laporan)
+            ));
 
             LogProses::create([
                 'id_laporan' => $laporan->id_laporan,

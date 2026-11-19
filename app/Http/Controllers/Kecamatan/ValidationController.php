@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Kecamatan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Laporan;
+use App\Models\Pengguna;
 use App\Models\Validasi;
+use App\Notifications\LaporanPUPRNotification;
+use App\Notifications\LaporanWargaNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Session;
 
 class ValidationController extends Controller
@@ -111,7 +115,7 @@ class ValidationController extends Controller
 
     public function update(Request $request, $id)
     {
-        $laporan = Laporan::findOrFail($id);
+        $laporan = Laporan::with(['jalan', 'pengguna'])->findOrFail($id);
         $kecamatanId = Session::get('kecamatan_id');
         $action = $request->input('action', 'acc');
         $catatan = trim((string) $request->input('catatan', ''));
@@ -147,6 +151,27 @@ class ValidationController extends Controller
                 ]
             );
 
+            // Mengirim Notifikasi ke semua PUPR (id_peran = 3)
+            $petugasPupr = Pengguna::where('id_peran', 3)->get();
+            Notification::send($petugasPupr, new LaporanPUPRNotification(
+                'disposisi_baru',
+                'Laporan Baru Masuk',
+                "Laporan #LP-{$laporan->id_laporan} di " . ($laporan->jalan->nama_jalan ?? 'jalan desa') . " telah divalidasi dan siap dikerjakan.",
+                $laporan->id_laporan,
+                route('pupr.progres.show', $laporan->id_laporan)
+            ));
+
+            // Mengirim Notifikasi ke Warga Pelapor
+            if ($laporan->pengguna) {
+                $laporan->pengguna->notify(new LaporanWargaNotification(
+                    'laporan_diterima',
+                    'Laporan Diterima & Diteruskan ke PUPR',
+                    "Laporan Anda di " . ($laporan->jalan->nama_jalan ?? 'lokasi laporan') . " telah disetujui pihak Kecamatan dan diteruskan ke Dinas PUPR.",
+                    $laporan->id_laporan,
+                    route('warga.laporan.show', $laporan->id_laporan)
+                ));
+            }
+
             $msg = "Laporan #{$laporan->id_laporan} berhasil divalidasi & diteruskan ke Dinas PUPR!";
             $type = 'success';
             $targetTab = 'diterima';
@@ -162,6 +187,17 @@ class ValidationController extends Controller
                     'catatan' => $catatan,
                 ]
             );
+
+            // Mengirim Notifikasi ke Warga Pelapor
+            if ($laporan->pengguna) {
+                $laporan->pengguna->notify(new LaporanWargaNotification(
+                    'laporan_ditolak',
+                    'Laporan Belum Dapat Diproses',
+                    "Laporan #LP-{$laporan->id_laporan} belum dapat diproses oleh pihak Kecamatan. Catatan: " . $catatan,
+                    $laporan->id_laporan,
+                    route('warga.laporan.show', $laporan->id_laporan)
+                ));
+            }
 
             $msg = "Laporan #{$laporan->id_laporan} telah ditolak.";
             $type = 'warning';

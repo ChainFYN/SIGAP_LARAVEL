@@ -41,6 +41,27 @@ Route::prefix('warga')->name('warga.')->group(function () {
     Route::middleware(['warga.auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('laporan', WargaLaporanController::class);
+
+        // Notifikasi Warga
+        Route::post('/notifications/{id}/read', function ($id) {
+            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            if ($pengguna) {
+                $notification = $pengguna->notifications()->where('id', $id)->first();
+                if ($notification) {
+                    $notification->markAsRead();
+                    return redirect($notification->data['url'] ?? route('warga.dashboard'));
+                }
+            }
+            return back();
+        })->name('notifications.read');
+
+        Route::post('/notifications/read-all', function () {
+            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            if ($pengguna) {
+                $pengguna->unreadNotifications->markAsRead();
+            }
+            return back();
+        })->name('notifications.read-all');
     });
 });
 
@@ -78,6 +99,27 @@ Route::prefix('pupr')->name('pupr.')->group(function () {
 
     // Riwayat Laporan (25% - 100%)
     Route::get('/riwayat', [PUPRDashboardController::class, 'riwayat'])->name('riwayat');
+
+    // Notifikasi PUPR
+    Route::post('/notifications/{id}/read', function ($id) {
+        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
+        if ($pengguna) {
+            $notification = $pengguna->notifications()->where('id', $id)->first();
+            if ($notification) {
+                $notification->markAsRead();
+                return redirect($notification->data['url'] ?? route('pupr.dashboard'));
+            }
+        }
+        return back();
+    })->name('notifications.read');
+
+    Route::post('/notifications/read-all', function () {
+        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
+        if ($pengguna) {
+            $pengguna->unreadNotifications->markAsRead();
+        }
+        return back();
+    })->name('notifications.read-all');
 });
 
 // Kecamatan Routes
@@ -96,4 +138,25 @@ Route::prefix('kecamatan')->name('kecamatan.')->group(function () {
     Route::get('/bast', [KecamatanBast::class, 'index'])->name('bast.index');
     Route::post('/bast/{id}', [KecamatanBast::class, 'update'])->name('bast.update');
     Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
+
+    // Notifikasi Kecamatan
+    Route::post('/notifications/{id}/read', function ($id) {
+        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
+        if ($pengguna) {
+            $notification = $pengguna->notifications()->where('id', $id)->first();
+            if ($notification) {
+                $notification->markAsRead();
+                return redirect($notification->data['url'] ?? route('kecamatan.dashboard'));
+            }
+        }
+        return back();
+    })->name('notifications.read');
+
+    Route::post('/notifications/read-all', function () {
+        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
+        if ($pengguna) {
+            $pengguna->unreadNotifications->markAsRead();
+        }
+        return back();
+    })->name('notifications.read-all');
 });

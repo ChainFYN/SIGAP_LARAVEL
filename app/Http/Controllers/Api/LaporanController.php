@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LaporanResource;
 use App\Models\Laporan;
+use App\Models\Pengguna;
+use App\Notifications\LaporanKecamatanNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class LaporanController extends Controller
 {
@@ -74,6 +77,16 @@ class LaporanController extends Controller
 
         // Muat relasi agar format JSON-nya lengkap
         $laporan->load(['jalan.desa.kecamatan', 'kategori', 'status', 'pengguna']);
+
+        // Kirim notifikasi ke admin Kecamatan (id_peran = 2)
+        $petugasKecamatan = Pengguna::where('id_peran', 2)->get();
+        Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
+            'laporan_baru',
+            'Laporan Baru Masuk',
+            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di " . ($laporan->jalan->nama_jalan ?? 'wilayah desa') . ".",
+            $laporan->id_laporan,
+            route('kecamatan.validation.index', ['ticket' => $laporan->id_laporan])
+        ));
 
         return response()->json([
             'success' => true,
