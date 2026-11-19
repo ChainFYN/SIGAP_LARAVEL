@@ -98,17 +98,25 @@
                         <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-amber-500 border-2 border-white rounded-full"></span>
                     </div>
 
-                    <!-- User Profile & Logout Dropdown -->
-                    <div class="relative" x-data="{ profileOpen: false }">
-                        <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 pl-5 border-l border-white/15 focus:outline-none">
-                            <div class="text-right hidden sm:block text-slate-100">
-                                <div class="text-xs font-extrabold text-white">{{ session('pupr_name', 'Ir. Hendra Gunawan, S.T.') }}</div>
-                                <div class="text-[10px] text-cyan-100/90 font-medium">Koordinator UPT<br>Pemeliharaan Jalan Wilayah 1</div>
-                            </div>
-                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 shrink-0 hover:bg-slate-300 transition-colors shadow-sm ring-1 ring-white/30">
-                                <i class="fa-regular fa-user"></i>
-                            </div>
-                        </button>
+                    <!-- User Profile & Logout -->
+                    <div class="flex items-center gap-3 pl-5 border-l border-white/15">
+                        <div class="text-right hidden sm:block text-slate-100">
+                            <div class="text-xs font-extrabold text-white">{{ session('pupr_name', 'Ir. Hendra Gunawan, S.T.') }}</div>
+                            <div class="text-[10px] text-cyan-100/90 font-medium">Koordinator UPT<br>Pemeliharaan Jalan Wilayah 1</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 shrink-0 shadow-sm ring-1 ring-white/30">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+
+                        <form method="POST" action="{{ route('pupr.logout') }}"
+                            onsubmit="return confirm('Apakah Anda yakin ingin keluar dari akun PUPR?')">
+                            @csrf
+                            <button type="submit" title="Keluar / Logout"
+                                    class="text-slate-100 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
+                                <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                            </button>
+                        </form>
+                    </div>
 
                         <!-- Profile Dropdown -->
                         <div x-show="profileOpen" @click.away="profileOpen = false" x-cloak

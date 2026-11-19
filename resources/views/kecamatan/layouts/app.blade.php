@@ -205,17 +205,27 @@
                         </div>
                     </div>
 
-                    <!-- User Profile Badge & Logout -->
-                    <div class="relative" x-data="{ profileOpen: false }">
-                        <button @click="profileOpen = !profileOpen" class="flex items-center gap-3 pl-5 border-l border-slate-200 focus:outline-none">
-                            <div class="text-right hidden sm:block text-slate-900">
-                                <div class="text-xs font-extrabold text-white">{{ session('kecamatan_name', 'Kecamatan') }}</div>
-                                <div class="text-[10px] text-slate-200 font-medium">Admin<br>Kecamatan Jember</div>
-                            </div>
-                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0 hover:bg-slate-300 transition-colors">
-                                <i class="fa-regular fa-user"></i>
-                            </div>
-                        </button>
+                    
+                   <!-- User Profile Badge & Logout -->
+                    <div class="flex items-center gap-3 pl-5 border-l border-slate-200">
+                        <div class="text-right hidden sm:block text-slate-900">
+                            <div class="text-xs font-extrabold text-white">{{ session('kecamatan_name', 'Kecamatan') }}</div>
+                            <div class="text-[10px] text-slate-200 font-medium">Admin<br>Kecamatan Jember</div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+                            <i class="fa-regular fa-user"></i>
+                        </div>
+
+                        <form method="POST" action="{{ route('kecamatan.logout') }}"
+                        class="flex items-center"
+                        onsubmit="return confirm('Apakah Anda yakin ingin keluar dari akun Kecamatan?')">
+                         @csrf
+                          <button type="submit" title="Keluar / Logout"
+                            class="flex items-center justify-center w-10 h-10 text-slate-100 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
+                             <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                          </button>
+                        </form>
+                    </div>
 
                         <!-- Profile Dropdown -->
                         <div x-show="profileOpen" @click.away="profileOpen = false" x-cloak
