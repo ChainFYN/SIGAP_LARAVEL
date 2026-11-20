@@ -126,71 +126,109 @@
                 <!-- Right: Profile & Actions -->
                 <div class="flex items-center gap-4">
                     @if(Session::has('warga_id'))
-                        @php
-                            $currentWarga = \App\Models\Pengguna::find(session('warga_id'));
-                            $unreadWargaNotifs = $currentWarga ? $currentWarga->unreadNotifications()->take(5)->get() : collect();
-                            $unreadWargaCount = $unreadWargaNotifs->count();
-                        @endphp
-                        <!-- Warga Notification Bell -->
-                        <div class="relative" x-data="{ notifOpen: false }">
-                            <button @click="notifOpen = !notifOpen"
-                                class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 relative transition-colors focus:outline-none">
-                                <i class="fa-regular fa-bell text-lg"></i>
-                                @if($unreadWargaCount > 0)
-                                    <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse">
-                                        {{ $unreadWargaCount }}
-                                    </span>
-                                @endif
-                            </button>
+                    @php
+                        $currentWarga = \App\Models\Pengguna::find(session('warga_id'));
+                        $allWargaNotifs = $currentWarga ? $currentWarga->notifications()->take(10)->get() : collect();
+                        $unreadWargaCount = $currentWarga ? $currentWarga->unreadNotifications()->count() : 0;
+                    @endphp
 
-                            <!-- Notification Dropdown -->
-                            <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
-                                class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden text-slate-800">
-                                <div class="px-4 pb-3 border-b border-slate-100 flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Saya</span>
-                                        @if($unreadWargaCount > 0)
-                                            <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unreadWargaCount }} baru</span>
-                                        @endif
-                                    </div>
-                                    @if($unreadWargaCount > 0)
-                                        <form action="{{ route('warga.notifications.read-all') }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
-                                                Tandai Dibaca
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                                <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
-                                    @forelse($unreadWargaNotifs as $notif)
-                                        <form action="{{ route('warga.notifications.read', $notif->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="w-full text-left p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
-                                                <!-- Icon Tipe -->
-                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 
-                                                    {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'bg-emerald-100 text-emerald-600' : 
-                                                       (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600') }}">
-                                                    <i class="fa-solid 
-                                                        {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'fa-circle-check' : 
-                                                           (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'fa-circle-xmark' : 'fa-wrench') }} text-xs"></i>
-                                                </div>
-                                                <div class="flex-1">
+                    <!-- Warga Notification Bell with Live Polling -->
+                    <div class="relative"
+                         x-data="{
+                            notifOpen: false,
+                            tab: 'semua',
+                            unreadCount: {{ $unreadWargaCount }},
+                            pollUnread() {
+                                fetch('{{ route('warga.notifications.unread-count') }}')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.unreadCount = data.count;
+                                    })
+                                    .catch(() => {});
+                            }
+                         }"
+                         x-init="setInterval(() => pollUnread(), 30000)">
+
+                        <button @click="notifOpen = !notifOpen"
+                            class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 relative transition-colors focus:outline-none">
+                            <i class="fa-regular fa-bell text-lg"></i>
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse"
+                                      x-text="unreadCount">
+                                </span>
+                            </template>
+                        </button>
+
+                        <!-- Dropdown Panel -->
+                        <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
+                            class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden text-slate-800">
+
+                            <div class="px-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Saya</span>
+                                @if($unreadWargaCount > 0)
+                                    <form action="{{ route('warga.notifications.read-all') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors">
+                                            Tandai Dibaca
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+
+                            <!-- Tab Filter -->
+                            <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500">
+                                <button type="button"
+                                        @click="tab = 'semua'"
+                                        :class="tab === 'semua' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'"
+                                        class="px-2.5 py-1 rounded-lg transition-all text-[11px]">
+                                    Semua ({{ $allWargaNotifs->count() }})
+                                </button>
+                                <button type="button"
+                                        @click="tab = 'unread'"
+                                        :class="tab === 'unread' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'"
+                                        class="px-2.5 py-1 rounded-lg transition-all text-[11px] flex items-center gap-1">
+                                    Belum Dibaca
+                                    <template x-if="unreadCount > 0">
+                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500 text-white" x-text="unreadCount"></span>
+                                    </template>
+                                </button>
+                            </div>
+
+                            <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
+                                @forelse($allWargaNotifs as $notif)
+                                    @php $isUnread = is_null($notif->read_at); @endphp
+                                    <form action="{{ route('warga.notifications.read', $notif->id) }}" method="POST"
+                                          x-show="tab === 'semua' || (tab === 'unread' && {{ $isUnread ? 'true' : 'false' }})">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left p-3.5 transition-colors flex gap-3 items-start {{ $isUnread ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/80 opacity-70' }}">
+                                            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5
+                                                {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'bg-emerald-100 text-emerald-600' :
+                                                   (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600') }}">
+                                                <i class="fa-solid
+                                                    {{ ($notif->data['tipe'] ?? '') === 'laporan_selesai' ? 'fa-circle-check' :
+                                                       (($notif->data['tipe'] ?? '') === 'laporan_ditolak' ? 'fa-circle-xmark' : 'fa-wrench') }} text-xs"></i>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between gap-1">
                                                     <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
-                                                    <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
-                                                    <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                                    @if($isUnread)
+                                                        <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0" title="Belum dibaca"></span>
+                                                    @endif
                                                 </div>
-                                            </button>
-                                        </form>
-                                    @empty
-                                        <div class="py-8 text-center text-slate-400">
-                                            <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
-                                            <p class="text-xs font-medium">Belum ada notifikasi baru</p>
-                                        </div>
-                                    @endforelse
-                                </div>
+                                                <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
+                                                <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
+                                            </div>
+                                        </button>
+                                    </form>
+                                @empty
+                                    <div class="py-8 text-center text-slate-400">
+                                        <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
+                                        <p class="text-xs font-medium">Belum ada riwayat notifikasi</p>
+                                    </div>
+                                @endforelse
                             </div>
                         </div>
+                    </div>
 
                         <!-- User Profile Badge & Logout -->
                         <div class="flex items-center gap-3 pl-4 border-l border-white/20">

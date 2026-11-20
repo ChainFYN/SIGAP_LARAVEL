@@ -43,6 +43,11 @@ Route::prefix('warga')->name('warga.')->group(function () {
         Route::resource('laporan', WargaLaporanController::class);
 
         // Notifikasi Warga
+        Route::get('/notifications/unread-count', function () {
+            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
+        })->name('notifications.unread-count');
+
         Route::post('/notifications/{id}/read', function ($id) {
             $pengguna = \App\Models\Pengguna::find(session('warga_id'));
             if ($pengguna) {
@@ -103,6 +108,11 @@ Route::prefix('pupr')->name('pupr.')->group(function () {
     Route::get('/riwayat', [PUPRDashboardController::class, 'riwayat'])->name('riwayat');
 
     // Notifikasi PUPR
+    Route::get('/notifications/unread-count', function () {
+        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
+        return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
+    })->name('notifications.unread-count');
+
     Route::post('/notifications/{id}/read', function ($id) {
         $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
         if ($pengguna) {
@@ -142,6 +152,11 @@ Route::prefix('kecamatan')->name('kecamatan.')->group(function () {
     Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 
     // Notifikasi Kecamatan
+    Route::get('/notifications/unread-count', function () {
+        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
+        return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
+    })->name('notifications.unread-count');
+
     Route::post('/notifications/{id}/read', function ($id) {
         $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
         if ($pengguna) {

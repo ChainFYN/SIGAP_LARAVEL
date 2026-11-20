@@ -153,33 +153,47 @@
                 <!-- Right: Notifications & Profile -->
                 <div class="flex items-center gap-5">
 
-                    <!-- Notification Bell Dropdown -->
                     @php
                         $currentKecamatan = \App\Models\Pengguna::find(session('kecamatan_id'));
-                        $unreadKecNotifs = $currentKecamatan ? $currentKecamatan->unreadNotifications()->take(5)->get() : collect();
-                        $unreadKecCount = $unreadKecNotifs->count();
+                        $allKecNotifs = $currentKecamatan ? $currentKecamatan->notifications()->take(10)->get() : collect();
+                        $unreadKecCount = $currentKecamatan ? $currentKecamatan->unreadNotifications()->count() : 0;
                     @endphp
-                    <div class="relative" x-data="{ notifOpen: false }">
+
+                    <!-- Notification Bell Dropdown with Live Polling -->
+                    <div class="relative"
+                         x-data="{
+                            notifOpen: false,
+                            tab: 'semua',
+                            unreadCount: {{ $unreadKecCount }},
+                            pollUnread() {
+                                fetch('{{ route('kecamatan.notifications.unread-count') }}')
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        this.unreadCount = data.count;
+                                    })
+                                    .catch(() => {});
+                            }
+                         }"
+                         x-init="setInterval(() => pollUnread(), 30000)">
+
+                        <!-- Tombol Lonceng -->
                         <button @click="notifOpen = !notifOpen"
                             class="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 relative transition-colors focus:outline-none">
                             <i class="fa-regular fa-bell text-lg"></i>
-                            @if($unreadKecCount > 0)
-                                <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse">
-                                    {{ $unreadKecCount }}
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-[#0C146A] animate-pulse"
+                                      x-text="unreadCount">
                                 </span>
-                            @endif
+                            </template>
                         </button>
 
-                        <!-- Notification Dropdown -->
+                        <!-- Notification Dropdown Panel -->
                         <div x-show="notifOpen" @click.away="notifOpen = false" x-cloak
                             class="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-50 overflow-hidden text-slate-800">
-                            <div class="px-4 pb-3 border-b border-slate-100 flex items-center justify-between">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Masuk</span>
-                                    @if($unreadKecCount > 0)
-                                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $unreadKecCount }} baru</span>
-                                    @endif
-                                </div>
+
+                            <!-- Header -->
+                            <div class="px-4 pb-2 border-b border-slate-100 flex items-center justify-between">
+                                <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Notifikasi Masuk</span>
                                 @if($unreadKecCount > 0)
                                     <form action="{{ route('kecamatan.notifications.read-all') }}" method="POST">
                                         @csrf
@@ -189,17 +203,44 @@
                                     </form>
                                 @endif
                             </div>
+
+                            <!-- Poin 1: Tab Filter -->
+                            <div class="flex items-center gap-1.5 px-4 py-2 bg-slate-50 border-b border-slate-100 text-xs font-bold text-slate-500">
+                                <button type="button"
+                                        @click="tab = 'semua'"
+                                        :class="tab === 'semua' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'"
+                                        class="px-2.5 py-1 rounded-lg transition-all text-[11px]">
+                                    Semua ({{ $allKecNotifs->count() }})
+                                </button>
+                                <button type="button"
+                                        @click="tab = 'unread'"
+                                        :class="tab === 'unread' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'"
+                                        class="px-2.5 py-1 rounded-lg transition-all text-[11px] flex items-center gap-1">
+                                    Belum Dibaca
+                                    <template x-if="unreadCount > 0">
+                                        <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500 text-white" x-text="unreadCount"></span>
+                                    </template>
+                                </button>
+                            </div>
+
+                            <!-- Daftar Notifikasi -->
                             <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto custom-scrollbar">
-                                @forelse($unreadKecNotifs as $notif)
-                                    <form action="{{ route('kecamatan.notifications.read', $notif->id) }}" method="POST">
+                                @forelse($allKecNotifs as $notif)
+                                    @php $isUnread = is_null($notif->read_at); @endphp
+                                    <form action="{{ route('kecamatan.notifications.read', $notif->id) }}" method="POST"
+                                          x-show="tab === 'semua' || (tab === 'unread' && {{ $isUnread ? 'true' : 'false' }})">
                                         @csrf
-                                        <button type="submit" class="w-full text-left p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start">
-                                            <!-- Icon Tipe -->
+                                        <button type="submit" class="w-full text-left p-3.5 transition-colors flex gap-3 items-start {{ $isUnread ? 'bg-white hover:bg-slate-50' : 'bg-slate-50/50 hover:bg-slate-100/80 opacity-70' }}">
                                             <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 {{ ($notif->data['tipe'] ?? '') === 'pengajuan_bast' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600' }}">
                                                 <i class="fa-solid {{ ($notif->data['tipe'] ?? '') === 'pengajuan_bast' ? 'fa-clipboard-check' : 'fa-bullhorn' }} text-xs"></i>
                                             </div>
                                             <div class="flex-1">
-                                                <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <div class="text-xs font-bold text-slate-900 leading-snug">{{ $notif->data['judul'] ?? 'Pemberitahuan' }}</div>
+                                                    @if($isUnread)
+                                                        <span class="w-2 h-2 rounded-full bg-rose-500 shrink-0" title="Belum dibaca"></span>
+                                                    @endif
+                                                </div>
                                                 <div class="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{{ $notif->data['pesan'] ?? '' }}</div>
                                                 <div class="text-[10px] text-slate-400 mt-1">{{ $notif->created_at->diffForHumans() }}</div>
                                             </div>
@@ -208,7 +249,7 @@
                                 @empty
                                     <div class="py-8 text-center text-slate-400">
                                         <i class="fa-regular fa-bell-slash text-2xl mb-2 text-slate-300"></i>
-                                        <p class="text-xs font-medium">Tidak ada notifikasi baru</p>
+                                        <p class="text-xs font-medium">Belum ada notifikasi</p>
                                     </div>
                                 @endforelse
                             </div>
