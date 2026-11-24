@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Auth
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/register', [AuthController::class, 'register']);
 
 // Wilayah untuk Form Register Calon Warga di Flutter
@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', function (Request $request) {
         $notifications = $request->user()->notifications()->take(20)->get();
         $unreadCount = $request->user()->unreadNotifications()->count();
+
         return response()->json([
             'success' => true,
             'unread_count' => $unreadCount,
@@ -56,11 +57,13 @@ Route::middleware('auth:sanctum')->group(function () {
         if ($notification) {
             $notification->markAsRead();
         }
+
         return response()->json(['success' => true, 'message' => 'Notifikasi ditandai dibaca.']);
     });
 
     Route::post('/notifications/read-all', function (Request $request) {
         $request->user()->unreadNotifications->markAsRead();
+
         return response()->json(['success' => true, 'message' => 'Semua notifikasi ditandai dibaca.']);
     });
 

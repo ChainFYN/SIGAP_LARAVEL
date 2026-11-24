@@ -35,6 +35,10 @@ class WargaAuthController extends Controller
         }
 
         if ($user && Hash::check($request->password, $user->password)) {
+            // Bersihkan residu session peran lain & cegah session fixation
+            Session::forget(['warga_id', 'warga_name', 'pupr_id', 'pupr_name', 'kecamatan_id', 'kecamatan_name']);
+            $request->session()->regenerate();
+
             if ($user->id_peran == 1) {
                 Session::put('warga_id', $user->id_pengguna);
                 Session::put('warga_name', $user->nama_lengkap);

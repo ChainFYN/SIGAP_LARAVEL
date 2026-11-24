@@ -12,6 +12,7 @@ use App\Http\Controllers\Pupr\ProgresController;
 use App\Http\Controllers\Pupr\TimLapanganController;
 use App\Http\Controllers\Warga\DashboardController;
 use App\Http\Controllers\Warga\LaporanController as WargaLaporanController;
+use App\Models\Pengguna;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,7 +33,7 @@ Route::get('/', function () {
 Route::prefix('warga')->name('warga.')->group(function () {
     // Auth Routes
     Route::get('/login', [WargaAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [WargaAuthController::class, 'login']);
+    Route::post('/login', [WargaAuthController::class, 'login'])->middleware('throttle:5,1');
     Route::get('/register', [WargaAuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [WargaAuthController::class, 'register']);
     Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
@@ -44,136 +45,148 @@ Route::prefix('warga')->name('warga.')->group(function () {
 
         // Notifikasi Warga
         Route::get('/notifications/unread-count', function () {
-            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            $pengguna = Pengguna::find(session('warga_id'));
+
             return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
         })->name('notifications.unread-count');
 
         Route::post('/notifications/{id}/read', function ($id) {
-            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            $pengguna = Pengguna::find(session('warga_id'));
             if ($pengguna) {
                 $notification = $pengguna->notifications()->where('id', $id)->first();
                 if ($notification) {
                     $notification->markAsRead();
+
                     return redirect($notification->data['url'] ?? route('warga.dashboard'));
                 }
             }
+
             return back();
         })->name('notifications.read');
 
         Route::post('/notifications/read-all', function () {
-            $pengguna = \App\Models\Pengguna::find(session('warga_id'));
+            $pengguna = Pengguna::find(session('warga_id'));
             if ($pengguna) {
                 $pengguna->unreadNotifications->markAsRead();
             }
+
             return back();
         })->name('notifications.read-all');
     });
 });
 
 // Backward compatibility redirects for legacy paths
-Route::get('/login', fn () => redirect()->route('warga.login'));
+Route::get('/login', fn () => redirect()->route('warga.login'))->name('login');
 Route::get('/register', fn () => redirect()->route('warga.register'));
 Route::get('/dashboard', fn () => redirect()->route('warga.dashboard'));
 Route::get('/laporan', fn () => redirect()->route('warga.laporan.index'));
 
 // PUPR Routes
 Route::prefix('pupr')->name('pupr.')->group(function () {
+    // Route Publik (tanpa login)
     Route::get('/login', function () {
         return redirect()->route('warga.login');
     })->name('login');
-    Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard', [PUPRDashboardController::class, 'index'])->name('dashboard');
+    // Route Terproteksi PUPR
+    Route::middleware(['pupr.auth'])->group(function () {
+        Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 
-    Route::get('/laporan', [PUPRLaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/{id}', [PUPRLaporanController::class, 'show'])->name('laporan.show');
-    Route::post('/laporan/{id}/progress', [PUPRLaporanController::class, 'updateProgress'])->name('laporan.update-progress');
-    Route::post('/laporan/{id}/selesai', [PUPRLaporanController::class, 'selesaiBast'])->name('laporan.selesai-bast');
+        Route::get('/dashboard', [PUPRDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/laporan', [PUPRLaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/{id}', [PUPRLaporanController::class, 'show'])->name('laporan.show');
+        Route::post('/laporan/{id}/progress', [PUPRLaporanController::class, 'updateProgress'])->name('laporan.update-progress');
+        Route::post('/laporan/{id}/selesai', [PUPRLaporanController::class, 'selesaiBast'])->name('laporan.selesai-bast');
 
-    Route::get('/progres', [ProgresController::class, 'index'])->name('progres.index');
-    Route::get('/progres/{id}', [ProgresController::class, 'show'])->name('progres.show');
-    Route::post('/progres/{id}', [ProgresController::class, 'update'])->name('progres.update');
-    Route::post('/laporan/{id}/tugaskan-tim', [TimLapanganController::class, 'tugaskanLaporan'])->name('laporan.tugaskan-tim');
+        Route::get('/progres', [ProgresController::class, 'index'])->name('progres.index');
+        Route::get('/progres/{id}', [ProgresController::class, 'show'])->name('progres.show');
+        Route::post('/progres/{id}', [ProgresController::class, 'update'])->name('progres.update');
+        Route::post('/laporan/{id}/tugaskan-tim', [TimLapanganController::class, 'tugaskanLaporan'])->name('laporan.tugaskan-tim');
 
-    // Tim Lapangan Routes
-    Route::get('/tim-lapangan', [TimLapanganController::class, 'index'])->name('tim-lapangan.index');
-    Route::post('/tim-lapangan/{id}/tugaskan', [TimLapanganController::class, 'tugaskan'])->name('tim-lapangan.tugaskan');
-    Route::put('/tim-lapangan/{id}/status', [TimLapanganController::class, 'updateStatus'])->name('tim-lapangan.update-status');
-    Route::put('/tim-lapangan/{id}/personel', [TimLapanganController::class, 'updatePersonel'])->name('tim-lapangan.update-personel');
+        Route::get('/tim-lapangan', [TimLapanganController::class, 'index'])->name('tim-lapangan.index');
+        Route::post('/tim-lapangan/{id}/tugaskan', [TimLapanganController::class, 'tugaskan'])->name('tim-lapangan.tugaskan');
+        Route::put('/tim-lapangan/{id}/status', [TimLapanganController::class, 'updateStatus'])->name('tim-lapangan.update-status');
+        Route::put('/tim-lapangan/{id}/personel', [TimLapanganController::class, 'updatePersonel'])->name('tim-lapangan.update-personel');
 
-    // BAST PDF Route
-    Route::get('/bast/{id}/generate', [PUPRBastController::class, 'generatePdf'])->name('bast.generate');
+        Route::get('/bast/{id}/generate', [PUPRBastController::class, 'generatePdf'])->name('bast.generate');
+        Route::get('/riwayat', [PUPRDashboardController::class, 'riwayat'])->name('riwayat');
 
-    // Riwayat Laporan (25% - 100%)
-    Route::get('/riwayat', [PUPRDashboardController::class, 'riwayat'])->name('riwayat');
+        Route::get('/notifications/unread-count', function () {
+            $pengguna = Pengguna::find(session('pupr_id'));
 
-    // Notifikasi PUPR
-    Route::get('/notifications/unread-count', function () {
-        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
-        return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
-    })->name('notifications.unread-count');
+            return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
+        })->name('notifications.unread-count');
 
-    Route::post('/notifications/{id}/read', function ($id) {
-        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
-        if ($pengguna) {
-            $notification = $pengguna->notifications()->where('id', $id)->first();
-            if ($notification) {
-                $notification->markAsRead();
-                return redirect($notification->data['url'] ?? route('pupr.dashboard'));
+        Route::post('/notifications/{id}/read', function ($id) {
+            $pengguna = Pengguna::find(session('pupr_id'));
+            if ($pengguna) {
+                $notification = $pengguna->notifications()->where('id', $id)->first();
+                if ($notification) {
+                    $notification->markAsRead();
+
+                    return redirect($notification->data['url'] ?? route('pupr.dashboard'));
+                }
             }
-        }
-        return back();
-    })->name('notifications.read');
 
-    Route::post('/notifications/read-all', function () {
-        $pengguna = \App\Models\Pengguna::find(session('pupr_id'));
-        if ($pengguna) {
-            $pengguna->unreadNotifications->markAsRead();
-        }
-        return back();
-    })->name('notifications.read-all');
+            return back();
+        })->name('notifications.read');
+
+        Route::post('/notifications/read-all', function () {
+            $pengguna = Pengguna::find(session('pupr_id'));
+            if ($pengguna) {
+                $pengguna->unreadNotifications->markAsRead();
+            }
+
+            return back();
+        })->name('notifications.read-all');
+    });
 });
 
 // Kecamatan Routes
 Route::prefix('kecamatan')->name('kecamatan.')->group(function () {
-    Route::get('/dashboard', [KecamatanDashboard::class, 'index'])->name('dashboard');
-    Route::get('/validasi', [KecamatanValidation::class, 'index'])->name('validation.index');
-    Route::post('/validasi/{id}', [KecamatanValidation::class, 'update'])->name('validation.update');
-    Route::get('/rekapitulasi', [KecamatanReport::class, 'recapitulation'])->name('reports.recapitulation');
-    Route::get('/statistik', [KecamatanReport::class, 'statistics'])->name('reports.statistics');
-    Route::get('/master-desa', [KecamatanReport::class, 'masterDesa'])->name('reports.master-desa');
-    Route::get('/peta-gis', [KecamatanReport::class, 'gisMap'])->name('reports.gis-map');
-    Route::get('/cetak-bap/{id}', [KecamatanReport::class, 'printBap'])->name('reports.print-bap');
-    Route::get('/ekspor-bap', [KecamatanReport::class, 'exportBap'])->name('reports.export-bap');
-    Route::get('/lapor-baru', [KecamatanReport::class, 'create'])->name('reports.create');
-    Route::post('/lapor-baru', [KecamatanReport::class, 'store'])->name('reports.store');
-    Route::get('/bast', [KecamatanBast::class, 'index'])->name('bast.index');
-    Route::post('/bast/{id}', [KecamatanBast::class, 'update'])->name('bast.update');
-    Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
+    Route::middleware(['kecamatan.auth'])->group(function () {
+        Route::get('/dashboard', [KecamatanDashboard::class, 'index'])->name('dashboard');
+        Route::get('/validasi', [KecamatanValidation::class, 'index'])->name('validation.index');
+        Route::post('/validasi/{id}', [KecamatanValidation::class, 'update'])->name('validation.update');
+        Route::get('/rekapitulasi', [KecamatanReport::class, 'recapitulation'])->name('reports.recapitulation');
+        Route::get('/statistik', [KecamatanReport::class, 'statistics'])->name('reports.statistics');
+        Route::get('/master-desa', [KecamatanReport::class, 'masterDesa'])->name('reports.master-desa');
+        Route::get('/peta-gis', [KecamatanReport::class, 'gisMap'])->name('reports.gis-map');
+        Route::get('/cetak-bap/{id}', [KecamatanReport::class, 'printBap'])->name('reports.print-bap');
+        Route::get('/ekspor-bap', [KecamatanReport::class, 'exportBap'])->name('reports.export-bap');
+        Route::get('/lapor-baru', [KecamatanReport::class, 'create'])->name('reports.create');
+        Route::post('/lapor-baru', [KecamatanReport::class, 'store'])->name('reports.store');
+        Route::get('/bast', [KecamatanBast::class, 'index'])->name('bast.index');
+        Route::post('/bast/{id}', [KecamatanBast::class, 'update'])->name('bast.update');
+        Route::post('/logout', [WargaAuthController::class, 'logout'])->name('logout');
 
-    // Notifikasi Kecamatan
-    Route::get('/notifications/unread-count', function () {
-        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
-        return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
-    })->name('notifications.unread-count');
+        Route::get('/notifications/unread-count', function () {
+            $pengguna = Pengguna::find(session('kecamatan_id'));
 
-    Route::post('/notifications/{id}/read', function ($id) {
-        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
-        if ($pengguna) {
-            $notification = $pengguna->notifications()->where('id', $id)->first();
-            if ($notification) {
-                $notification->markAsRead();
-                return redirect($notification->data['url'] ?? route('kecamatan.dashboard'));
+            return response()->json(['count' => $pengguna ? $pengguna->unreadNotifications()->count() : 0]);
+        })->name('notifications.unread-count');
+
+        Route::post('/notifications/{id}/read', function ($id) {
+            $pengguna = Pengguna::find(session('kecamatan_id'));
+            if ($pengguna) {
+                $notification = $pengguna->notifications()->where('id', $id)->first();
+                if ($notification) {
+                    $notification->markAsRead();
+
+                    return redirect($notification->data['url'] ?? route('kecamatan.dashboard'));
+                }
             }
-        }
-        return back();
-    })->name('notifications.read');
 
-    Route::post('/notifications/read-all', function () {
-        $pengguna = \App\Models\Pengguna::find(session('kecamatan_id'));
-        if ($pengguna) {
-            $pengguna->unreadNotifications->markAsRead();
-        }
-        return back();
-    })->name('notifications.read-all');
+            return back();
+        })->name('notifications.read');
+
+        Route::post('/notifications/read-all', function () {
+            $pengguna = Pengguna::find(session('kecamatan_id'));
+            if ($pengguna) {
+                $pengguna->unreadNotifications->markAsRead();
+            }
+
+            return back();
+        })->name('notifications.read-all');
+    });
 });

@@ -83,7 +83,7 @@ class LaporanController extends Controller
         Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
             'laporan_baru',
             'Laporan Baru Masuk',
-            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di " . ($laporan->jalan->nama_jalan ?? 'wilayah desa') . ".",
+            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di ".($laporan->jalan->nama_jalan ?? 'wilayah desa').'.',
             $laporan->id_laporan,
             route('kecamatan.validation.index', ['ticket' => $laporan->id_laporan])
         ));
@@ -98,8 +98,10 @@ class LaporanController extends Controller
     /**
      * Mengambil detail satu laporan beserta catatan validasi & log progres PUPR
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
+        $user = $request->user();
+
         $laporan = Laporan::with([
             'jalan.desa.kecamatan',
             'kategori',
@@ -114,6 +116,14 @@ class LaporanController extends Controller
                 'success' => false,
                 'message' => 'Laporan tidak ditemukan.',
             ], 404);
+        }
+
+        // Proteksi IDOR: Warga hanya boleh melihat laporannya sendiri
+        if ($user->id_peran == 1 && $laporan->id_pengguna !== $user->id_pengguna) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Anda tidak memiliki izin untuk melihat laporan ini.',
+            ], 403);
         }
 
         return response()->json([
