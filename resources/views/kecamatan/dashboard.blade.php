@@ -95,6 +95,7 @@
 </div>
 @endsection
 
+@push('scripts')
 <script>
 function filterKecamatan(waktu, el) {
     const container = document.getElementById('antrean-container');
@@ -134,3 +135,4 @@ function filterKecamatan(waktu, el) {
     });
 }
 </script>
+@endpush

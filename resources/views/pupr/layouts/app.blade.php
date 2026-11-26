@@ -241,36 +241,35 @@
         </div>
     </header>
 
+    <!-- TOAST NOTIFICATION (Pojok Kanan Bawah seperti Warga & Kecamatan) -->
+    @if(session('success') || session('status'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border text-sm font-semibold transition-all transform animate-in slide-in-from-bottom-5 duration-300 bg-emerald-600 text-white border-emerald-500">
+            <i class="fa-solid fa-circle-check text-lg"></i>
+            <div>
+                <p class="leading-tight">{{ session('success') ?? session('status') }}</p>
+            </div>
+            <button @click="show = false" class="ml-3 text-white/80 hover:text-white cursor-pointer">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+             class="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border text-sm font-semibold transition-all transform animate-in slide-in-from-bottom-5 duration-300 bg-red-600 text-white border-red-500">
+            <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+            <div>
+                <p class="leading-tight">{{ session('error') }}</p>
+            </div>
+            <button @click="show = false" class="ml-3 text-white/80 hover:text-white cursor-pointer">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+    @endif
+
     <!-- MAIN CONTENT -->
     <main class="flex-1 bg-slate-50">
-        @if(session('success'))
-        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-semibold flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 text-xs">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-semibold flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-triangle-exclamation text-red-600 text-lg"></i>
-                    <span>{{ session('error') }}</span>
-                </div>
-                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-800 text-xs">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-        </div>
-        @endif
-
         @yield('content')
     </main>
 

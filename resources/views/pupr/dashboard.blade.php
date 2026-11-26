@@ -34,29 +34,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between shadow-xs">
-            <div class="flex items-center gap-2.5">
-                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
-                <span>{{ session('error') }}</span>
-            </div>
-            <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-    @endif
-
     <!-- DASHBOARD CONTENT (UPDATED VIA AJAX WITHOUT RELOAD) -->
     <div id="pupr-dashboard-content">
         @include('pupr.partials.dashboard_content')
