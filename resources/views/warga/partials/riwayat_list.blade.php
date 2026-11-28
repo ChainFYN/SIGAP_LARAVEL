@@ -94,13 +94,7 @@
                 <i class="fa-regular fa-folder-open text-2xl"></i>
             </div>
             <h4 class="text-base font-extrabold text-slate-900 mb-1">Belum Ada Laporan</h4>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-5 leading-relaxed">
-                Anda belum pernah mengirimkan laporan kerusakan jalan. Bantu laporkan kerusakan jalan di wilayah Anda sekarang.
-            </p>
-            <a href="{{ route('warga.laporan.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition">
-                <i class="fa-solid fa-plus"></i>
-                <span>Buat Laporan Pertama</span>
-            </a>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mb-5 leading-relaxed">            </p>
         </div>
     @endforelse
 </div>

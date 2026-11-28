@@ -72,8 +72,7 @@
         </a>
     </div>
     <section class="bg-[#FCFAF9] rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8 mb-4">
-        <h3 class="text-center text-xs font-bold uppercase tracking-wider text-slate-400 mb-8">Alur Kerja Penanganan SIGAP</h3>
-
+<h3 class="text-center text-lg font-extrabold uppercase tracking-wider text-slate-800 mb-8">Alur Kerja Penanganan SIGAP</h3>
         <ol class="relative grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4">
             <!-- Garis penghubung (hanya tampil di desktop) -->
             <div class="hidden md:block absolute top-8 left-[12.5%] right-[12.5%] h-0.5 bg-slate-200"></div>
@@ -84,7 +83,6 @@
                 </span>
                 <span class="mt-4 text-[11px] font-bold uppercase tracking-wide text-slate-500">Langkah 1</span>
                 <h4 class="mt-1 text-sm font-extrabold text-slate-900">Buat Laporan</h4>
-                <p class="mt-1.5 text-xs text-slate-500 leading-relaxed max-w-[15rem]">Sertakan foto kondisi jalan, alamat jalan desa, dan koordinat GPS.</p>
             </li>
 
             <li class="relative flex flex-col items-center text-center">
@@ -93,7 +91,6 @@
                 </span>
                 <span class="mt-4 text-[11px] font-bold uppercase tracking-wide text-amber-600">Langkah 2</span>
                 <h4 class="mt-1 text-sm font-extrabold text-slate-900">Validasi Kecamatan</h4>
-                <p class="mt-1.5 text-xs text-slate-500 leading-relaxed max-w-[15rem]">Kecamatan memverifikasi kebenaran dan tingkat urgensi aduan.</p>
             </li>
 
             <li class="relative flex flex-col items-center text-center">
@@ -102,7 +99,6 @@
                 </span>
                 <span class="mt-4 text-[11px] font-bold uppercase tracking-wide text-blue-600">Langkah 3</span>
                 <h4 class="mt-1 text-sm font-extrabold text-slate-900">Penanganan Dinas PUPR</h4>
-                <p class="mt-1.5 text-xs text-slate-500 leading-relaxed max-w-[15rem]">UPT Bina Marga menerbitkan SPK dan menurunkan tim teknis lapangan.</p>
             </li>
 
             <li class="relative flex flex-col items-center text-center">
@@ -110,8 +106,7 @@
                     <i class="fa-solid fa-circle-check"></i>
                 </span>
                 <span class="mt-4 text-[11px] font-bold uppercase tracking-wide text-emerald-600">Langkah 4</span>
-                <h4 class="mt-1 text-sm font-extrabold text-slate-900">Selesai &amp; BAST Terbit</h4>
-                <p class="mt-1.5 text-xs text-slate-500 leading-relaxed max-w-[15rem]">Perbaikan rampung 100% dan bukti fisik dipublikasikan di sistem.</p>
+                <h4 class="mt-1 text-sm font-extrabold text-slate-900">Selesai</h4>
             </li>
         </ol>
     </section>
