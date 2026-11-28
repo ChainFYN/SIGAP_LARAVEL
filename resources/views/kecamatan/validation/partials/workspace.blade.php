@@ -9,10 +9,10 @@
             <input type="hidden" name="waktu" value="{{ $timeFilter }}">
             <div class="relative">
                 <input type="text"
-                       name="search"
-                       value="{{ $search }}"
-                       placeholder="Cari id laporan, jalan, pelapor..."
-                       class="w-full pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl shadow-2xs focus:outline-none focus:border-brand-500">
+                    name="search"
+                    value="{{ $search }}"
+                    placeholder="Cari id laporan, jalan, pelapor..."
+                    class="w-full pl-9 pr-4 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl shadow-2xs focus:outline-none focus:border-brand-500">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
             </div>
         </form>
@@ -20,15 +20,15 @@
         <!-- Filter Tabs Pills -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs">
             <a href="{{ route('kecamatan.validation.index', ['tab' => 'pending', 'search' => $search, 'waktu' => $timeFilter]) }}"
-               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ $tab == 'pending' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ $tab == 'pending' ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
                 Perlu Verifikasi ({{ $pendingCount }})
             </a>
             <a href="{{ route('kecamatan.validation.index', ['tab' => 'diterima', 'search' => $search, 'waktu' => $timeFilter]) }}"
-               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['diterima', 'selesai', 'resolved']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['diterima', 'selesai', 'resolved']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
                 Diterima ({{ $diterimaCount }})
             </a>
             <a href="{{ route('kecamatan.validation.index', ['tab' => 'ditolak', 'search' => $search, 'waktu' => $timeFilter]) }}"
-               class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['ditolak', 'rejected']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
+                class="px-3 py-1.5 rounded-lg font-bold transition-all whitespace-nowrap {{ in_array($tab, ['ditolak', 'rejected']) ? 'bg-slate-900 text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100' }}">
                 Ditolak ({{ $ditolakCount }})
             </a>
         </div>
@@ -37,13 +37,13 @@
         <div class="flex flex-col gap-3 max-h-[750px] overflow-y-auto pr-1 custom-scrollbar">
             @forelse($tickets as $t)
             @php
-                $isActive = $activeTicket && $activeTicket->id_laporan === $t->id_laporan;
-                $badgeClass = $t->tingkat_bahaya === 'Bahaya Tinggi'
-                    ? 'bg-red-500 text-white'
-                    : ($t->tingkat_bahaya === 'Sedang' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white');
+            $isActive = $activeTicket && $activeTicket->id_laporan === $t->id_laporan;
+            $badgeClass = $t->tingkat_bahaya === 'Bahaya Tinggi'
+            ? 'bg-red-500 text-white'
+            : ($t->tingkat_bahaya === 'Sedang' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white');
             @endphp
             <a href="{{ route('kecamatan.validation.index', ['ticket' => $t->id_laporan, 'tab' => $tab, 'search' => $search, 'waktu' => $timeFilter]) }}"
-               class="p-4 rounded-2xl border transition-all text-left block relative {{ $isActive ? 'bg-emerald-50/40 border-emerald-500 shadow-sm ring-1 ring-emerald-500' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xs' }}">
+                class="p-4 rounded-2xl border transition-all text-left block relative {{ $isActive ? 'bg-emerald-50/40 border-emerald-500 shadow-sm ring-1 ring-emerald-500' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-2xs' }}">
 
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-1.5">
@@ -73,7 +73,7 @@
                 </div>
 
                 @if($isActive)
-                    <div class="absolute -left-1 top-4 bottom-4 w-1 bg-emerald-600 rounded-r"></div>
+                <div class="absolute -left-1 top-4 bottom-4 w-1 bg-emerald-600 rounded-r"></div>
                 @endif
             </a>
             @empty
@@ -94,15 +94,15 @@
             <div>
                 <div class="flex items-center gap-3">
                     <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
-                        Detail Laporan <span class="font-mono text-brand-600">   {{ $activeTicket->id_laporan }}</span>
+                        Detail Laporan <span class="font-mono text-brand-600"> {{ $activeTicket->id_laporan }}</span>
                     </h2>
                     @php
-                        $statusClass = match($activeTicket->id_status) {
-                            2 => 'bg-blue-100 text-blue-800 border border-blue-300',
-                            3 => 'bg-emerald-100 text-emerald-800 border border-emerald-300',
-                            4 => 'bg-red-100 text-red-800 border border-red-300',
-                            default => 'bg-amber-100 text-amber-800 border border-amber-300',
-                        };
+                    $statusClass = match($activeTicket->id_status) {
+                    2 => 'bg-blue-100 text-blue-800 border border-blue-300',
+                    3 => 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+                    4 => 'bg-red-100 text-red-800 border border-red-300',
+                    default => 'bg-amber-100 text-amber-800 border border-amber-300',
+                    };
                     @endphp
                     <span class="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full {{ $statusClass }}">
                         {{ $activeTicket->status->nama_status ?? 'Menunggu Validasi' }}
@@ -118,8 +118,8 @@
             <!-- Share Actions -->
             <div class="flex items-center gap-2">
                 <button onclick="navigator.clipboard.writeText(window.location.href); alert('Tautan berhasil disalin!');"
-                        class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
-                        title="Bagikan Tautan">
+                    class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+                    title="Bagikan Tautan">
                     <i class="fa-solid fa-share-nodes text-sm"></i>
                 </button>
             </div>
@@ -147,21 +147,21 @@
                 <!-- Left: Citizen Photo Evidence -->
                 <div class="relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 group h-64">
                     @if($activeTicket->url_foto)
-                        <img src="{{ asset('storage/' . $activeTicket->url_foto) }}"
-                             alt="Bukti foto jalan rusak"
-                             class="w-full h-full object-cover">
+                    <img src="{{ asset('storage/' . $activeTicket->url_foto) }}"
+                        alt="Bukti foto jalan rusak"
+                        class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2">
-                            <i class="fa-solid fa-image text-3xl"></i>
-                            <span class="text-xs font-semibold">Tidak ada foto</span>
-                        </div>
+                    <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2">
+                        <i class="fa-solid fa-image text-3xl"></i>
+                        <span class="text-xs font-semibold">Tidak ada foto</span>
+                    </div>
                     @endif
                     <div class="absolute bottom-2 left-2 right-2 bg-slate-950/80 backdrop-blur-xs text-white text-[10px] font-mono px-2.5 py-1.5 rounded flex items-center justify-between">
                         <span>{{ $activeTicket->created_at ? $activeTicket->created_at->format('d M Y - H:i') : 'Hari ini' }} WIB</span>
                         @if($activeTicket->latitude && $activeTicket->longitude)
-                            <span class="text-emerald-400 font-bold">GPS Valid</span>
+                        <span class="text-emerald-400 font-bold">GPS Valid</span>
                         @else
-                            <span class="text-amber-400 font-bold">Tanpa GPS</span>
+                        <span class="text-amber-400 font-bold">Tanpa GPS</span>
                         @endif
                     </div>
                 </div>
@@ -169,16 +169,16 @@
                 <!-- Right: Interactive Leaflet GIS Map -->
                 <div class="relative rounded-xl overflow-hidden border border-slate-200 h-64">
                     @if($activeTicket->latitude && $activeTicket->longitude)
-                        <div id="ticketMap" class="w-full h-full z-10"
-                             data-lat="{{ $activeTicket->latitude }}"
-                             data-lng="{{ $activeTicket->longitude }}"
-                             data-id="{{ $activeTicket->id_laporan }}"
-                             data-jalan="{{ $activeTicket->jalan->nama_jalan ?? '' }}"></div>
+                    <div id="ticketMap" class="w-full h-full z-10"
+                        data-lat="{{ $activeTicket->latitude }}"
+                        data-lng="{{ $activeTicket->longitude }}"
+                        data-id="{{ $activeTicket->id_laporan }}"
+                        data-jalan="{{ $activeTicket->jalan->nama_jalan ?? '' }}"></div>
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2 bg-slate-50">
-                            <i class="fa-solid fa-map-location-dot text-3xl"></i>
-                            <span class="text-xs font-semibold">Koordinat GPS tidak tersedia</span>
-                        </div>
+                    <div class="w-full h-full flex items-center justify-center text-slate-400 flex-col gap-2 bg-slate-50">
+                        <i class="fa-solid fa-map-location-dot text-3xl"></i>
+                        <span class="text-xs font-semibold">Koordinat GPS tidak tersedia</span>
+                    </div>
                     @endif
                 </div>
 
@@ -235,13 +235,13 @@
 
             {{-- Flash message inline --}}
             @if(session('status'))
-                <div class="mt-4 p-3 rounded-xl text-xs font-bold flex items-center gap-2
+            <div class="mt-4 p-3 rounded-xl text-xs font-bold flex items-center gap-2
                     {{ session('status_type') === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : '' }}
                     {{ session('status_type') === 'warning' ? 'bg-amber-50 text-amber-800 border border-amber-200' : '' }}
                     {{ session('status_type') === 'info' ? 'bg-blue-50 text-blue-800 border border-blue-200' : '' }}">
-                    <i class="fa-solid {{ session('status_type') === 'success' ? 'fa-circle-check text-emerald-600' : (session('status_type') === 'warning' ? 'fa-triangle-exclamation text-amber-600' : 'fa-circle-info text-blue-600') }}"></i>
-                    {{ session('status') }}
-                </div>
+                <i class="fa-solid {{ session('status_type') === 'success' ? 'fa-circle-check text-emerald-600' : (session('status_type') === 'warning' ? 'fa-triangle-exclamation text-amber-600' : 'fa-circle-info text-blue-600') }}"></i>
+                {{ session('status') }}
+            </div>
             @endif
 
             <form action="{{ route('kecamatan.validation.update', $activeTicket->id_laporan) }}" method="POST" class="mt-4 flex flex-col gap-5">
@@ -254,14 +254,14 @@
 
                     <!-- Option 1: ACC -->
                     <div @click="decisionAction = 'acc'"
-                         :class="decisionAction === 'acc' ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300'"
-                         class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
+                        :class="decisionAction === 'acc' ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500' : 'border-slate-200 bg-white hover:border-slate-300'"
+                        class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold" :class="decisionAction === 'acc' ? 'text-emerald-900' : 'text-slate-800'">
                                 ACC — Teruskan ke PUPR
                             </span>
                             <div class="w-5 h-5 rounded-full flex items-center justify-center border"
-                                 :class="decisionAction === 'acc' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'">
+                                :class="decisionAction === 'acc' ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-white'">
                                 <i class="fa-solid fa-check text-[10px]" x-show="decisionAction === 'acc'"></i>
                             </div>
                         </div>
@@ -272,14 +272,14 @@
 
                     <!-- Option 2: Reject -->
                     <div @click="decisionAction = 'reject'"
-                         :class="decisionAction === 'reject' ? 'border-red-500 bg-red-50/50 ring-2 ring-red-500' : 'border-slate-200 bg-white hover:border-slate-300'"
-                         class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
+                        :class="decisionAction === 'reject' ? 'border-red-500 bg-red-50/50 ring-2 ring-red-500' : 'border-slate-200 bg-white hover:border-slate-300'"
+                        class="p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold" :class="decisionAction === 'reject' ? 'text-red-900' : 'text-slate-800'">
                                 REJECT — Tolak Aduan Warga
                             </span>
                             <div class="w-5 h-5 rounded-full flex items-center justify-center border"
-                                 :class="decisionAction === 'reject' ? 'bg-red-600 border-red-600 text-white' : 'border-slate-300 bg-white'">
+                                :class="decisionAction === 'reject' ? 'bg-red-600 border-red-600 text-white' : 'border-slate-300 bg-white'">
                                 <i class="fa-solid fa-xmark text-[10px]" x-show="decisionAction === 'reject'"></i>
                             </div>
                         </div>
@@ -302,16 +302,16 @@
                         </span>
                     </div>
                     <textarea name="catatan"
-                              rows="3"
-                              @input="charCount = $el.value.length"
-                              oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s\n\r.,!?\-()]/g, '')"
-                              class="w-full text-xs font-medium text-slate-800 bg-white border rounded-xl p-3 focus:outline-none focus:border-brand-500 leading-relaxed {{ $errors->has('catatan') ? 'border-red-400 bg-red-50/30' : 'border-slate-300' }}"
-                              placeholder="Tuliskan catatan teknis dan arahan penanganan (wajib diisi, tanpa simbol)...">{{ old('catatan') }}</textarea>
+                        rows="3"
+                        @input="charCount = $el.value.length"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s\n\r.,!?\-()]/g, '')"
+                        class="w-full text-xs font-medium text-slate-800 bg-white border rounded-xl p-3 focus:outline-none focus:border-brand-500 leading-relaxed {{ $errors->has('catatan') ? 'border-red-400 bg-red-50/30' : 'border-slate-300' }}"
+                        placeholder="Tuliskan catatan teknis dan arahan penanganan (wajib diisi, tanpa simbol)...">{{ old('catatan') }}</textarea>
                     @error('catatan')
-                        <div class="mt-1.5 flex items-center gap-1.5 text-red-600 text-[11px] font-semibold">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
-                            <span>{{ $message }}</span>
-                        </div>
+                    <div class="mt-1.5 flex items-center gap-1.5 text-red-600 text-[11px] font-semibold">
+                        <i class="fa-solid fa-circle-exclamation text-[10px]"></i>
+                        <span>{{ $message }}</span>
+                    </div>
                     @enderror
                 </div>
 
@@ -331,8 +331,8 @@
                 <!-- Form Action Button -->
                 <div class="flex items-center justify-end gap-3 pt-2">
                     <button type="submit"
-                            :class="decisionAction === 'acc' ? 'bg-brand-600 hover:bg-brand-700' : 'bg-red-600 hover:bg-red-700'"
-                            class="w-full sm:w-auto px-6 py-2.5 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
+                        :class="decisionAction === 'acc' ? 'bg-brand-600 hover:bg-brand-700' : 'bg-red-600 hover:bg-red-700'"
+                        class="w-full sm:w-auto px-6 py-2.5 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer">
                         <i class="fa-solid" :class="decisionAction === 'acc' ? 'fa-paper-plane' : 'fa-xmark'"></i>
                         <span x-text="decisionAction === 'acc' ? 'Submit Disposisi (ACC ke Dinas PUPR)' : 'Submit Keputusan (Tolak Aduan)'">Submit Keputusan</span>
                     </button>
@@ -346,28 +346,28 @@
         <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
             <div class="text-center py-6">
                 @if($activeTicket->id_status == 2)
-                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fa-solid fa-person-digging text-blue-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Telah Divalidasi & Diteruskan ke PUPR</h3>
-                    <p class="text-xs text-slate-500 mt-1">Catatan: {{ $activeTicket->validasi->catatan ?? '-' }}</p>
+                <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-person-digging text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Laporan Telah Divalidasi & Diteruskan ke PUPR</h3>
+                <p class="text-xs text-slate-500 mt-1">Catatan: {{ $activeTicket->validasi?->catatan ?? '-' }}</p>
                 @elseif($activeTicket->id_status == 3)
-                    <div class="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fa-solid fa-circle-check text-emerald-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Selesai Dikerjakan</h3>
-                    <p class="text-xs text-slate-500 mt-1">{{ $activeTicket->validasi->catatan ? 'Catatan Verifikasi: ' . $activeTicket->validasi->catatan : 'Pekerjaan perbaikan jalan telah rampung 100%.' }}</p>
+                <div class="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-2xl"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Laporan Selesai Dikerjakan</h3>
+                <p class="text-xs text-slate-500 mt-1">{{ $activeTicket->validasi?->catatan ? 'Catatan Verifikasi: ' . $activeTicket->validasi->catatan : 'Pekerjaan perbaikan jalan telah rampung 100%.' }}</p>
                 @elseif($activeTicket->id_status == 4)
-                    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fa-solid fa-circle-xmark text-red-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-sm font-extrabold text-slate-900">Laporan Ditolak</h3>
-                    <p class="text-xs text-slate-500 mt-1">Alasan: {{ $activeTicket->validasi->catatan ?? '-' }}</p>
+                <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-circle-xmark text-red-600 text-2xl"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Laporan Ditolak</h3>
+                <p class="text-xs text-slate-500 mt-1">Alasan: {{ $activeTicket->validasi?->catatan ?? '-' }}</p>
                 @else
-                    <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fa-solid fa-clock text-slate-500 text-2xl"></i>
-                    </div>
-                    <h3 class="text-sm font-extrabold text-slate-900">Status: {{ $activeTicket->status->nama_status ?? '-' }}</h3>
+                <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-clock text-slate-500 text-2xl"></i>
+                </div>
+                <h3 class="text-sm font-extrabold text-slate-900">Status: {{ $activeTicket->status->nama_status ?? '-' }}</h3>
                 @endif
             </div>
         </div>
@@ -387,4 +387,3 @@
     </div>
 
 </div>
-
