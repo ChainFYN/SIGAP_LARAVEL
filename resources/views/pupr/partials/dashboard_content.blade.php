@@ -1,46 +1,52 @@
 <!-- KPI CARDS -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <button type="button"
+        onclick="window.dispatchEvent(new CustomEvent('filter-laporan', { detail: 'siap_dikerjakan' })); document.getElementById('daftar-laporan').scrollIntoView({ behavior: 'smooth' });"
+        class="w-full bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center transition-all hover:shadow-md hover:border-[#0B4F6C] cursor-pointer">
         <div class="flex items-center justify-center">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">TERVALIDASI &amp; SPK CAMAT</div>
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">TERVERIFIKASI PIHAK KECAMATAN</div>
         </div>
         <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['diproses'] ?? 0 }}</div>
         </div>
-    </div>
+    </button>
 
     <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
         <div class="flex items-center justify-center">
-            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">MENUNGGU VALIDASI CAMAT</div>
+            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">MENUNGGU VERIFIKASI KECAMATAN</div>
         </div>
         <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['menunggu'] ?? 0 }}</div>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <button type="button"
+        onclick="window.dispatchEvent(new CustomEvent('filter-laporan', { detail: 'selesai' })); document.getElementById('daftar-laporan').scrollIntoView({ behavior: 'smooth' });"
+        class="w-full bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center transition-all hover:shadow-md hover:border-[#0B4F6C] cursor-pointer">
         <div class="flex items-center justify-center">
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">SELESAI DIVERIFIKASI</div>
         </div>
         <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['selesai'] ?? 0 }}</div>
         </div>
-    </div>
+    </button>
 
-    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+       <button type="button"
+        onclick="window.dispatchEvent(new CustomEvent('filter-laporan', { detail: 'all' })); document.getElementById('daftar-laporan').scrollIntoView({ behavior: 'smooth' });"
+        class="w-full bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center transition-all hover:shadow-md hover:border-[#0B4F6C] cursor-pointer">
         <div class="flex items-center justify-center">
             <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider text-center">TOTAL LAPORAN MASUK</div>
         </div>
         <div class="flex items-center justify-center h-full">
             <div class="text-4xl font-extrabold text-slate-900">{{ $statistik['total'] ?? 0 }}</div>
         </div>
-    </div>
+    </button>
 
 </div>
 
 <!-- DAFTAR LAPORAN (FULL WIDTH) -->
-<div class="w-full" x-data="{ filterStatus: 'all' }">
+<div id="daftar-laporan" class="w-full scroll-mt-24" x-data="{ filterStatus: 'all' }" @filter-laporan.window="filterStatus = $event.detail">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
             <h2 class="text-xl font-extrabold text-slate-900">Daftar Laporan Penanganan Jalan</h2>
