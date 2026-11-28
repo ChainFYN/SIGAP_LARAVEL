@@ -87,8 +87,8 @@
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased" style="background-color: #F8F5F4;" x-data="{ mobileMenuOpen: false }">
 
-    <!-- TOP NAVBAR (Disembunyikan pada halaman Login & Register) -->
-    @if(!request()->routeIs('warga.login') && !request()->routeIs('warga.register') && !isset($hideHeader))
+    <!-- TOP NAVBAR (Disembunyikan pada halaman Login, Register, & Lupa/Reset Password) -->
+    @if(!request()->routeIs('warga.login') && !request()->routeIs('warga.register') && !request()->routeIs('password.*') && !isset($hideHeader))
     <header class="navy-gradient border-b border-white/10 sticky top-0 z-40 shadow-[0_8px_24px_rgba(20,30,113,0.12)]">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
@@ -239,12 +239,68 @@
                             <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-[#141E71] font-bold shrink-0 shadow-sm">
                                 <i class="fa-regular fa-user"></i>
                             </div>
-                            <form id="logout-form" action="{{ route('warga.logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                            <button type="button" onclick="confirmLogout(event)" title="Keluar / Logout" class="text-slate-100 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors">
-                                <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
-                            </button>
+                            <!-- Tombol & Popover Logout di Pojok Kanan Atas -->
+                            <div class="relative" x-data="{ logoutOpen: false }">
+                                <button type="button"
+                                        @click="logoutOpen = !logoutOpen"
+                                        title="Keluar / Logout"
+                                        :class="logoutOpen ? 'bg-white/20 text-white' : 'text-slate-100 hover:text-white hover:bg-white/10'"
+                                        class="p-2 rounded-lg transition-colors focus:outline-none cursor-pointer">
+                                    <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
+                                </button>
+
+                                <!-- Backdrop transparan untuk klik di luar -->
+                                <div x-show="logoutOpen"
+                                     x-cloak
+                                     @click="logoutOpen = false"
+                                     class="fixed inset-0 z-40"></div>
+
+                                <!-- Popover Profil & Logout (Logo, Nama, Email, Tombol Keluar) -->
+                                <div x-show="logoutOpen"
+                                     x-cloak
+                                     x-transition:enter="transition ease-out duration-200"
+                                     x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                                     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave="transition ease-in duration-150"
+                                     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                     x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                                     @keydown.escape.window="logoutOpen = false"
+                                     class="absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-5 z-50 text-slate-800 ring-1 ring-black/5">
+                                    
+                                    <div class="relative mb-3">
+                                        <!-- Tombol Tutup X -->
+                                        <button type="button" @click="logoutOpen = false" class="absolute -top-1 -right-1 w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                                            <i class="fa-solid fa-xmark text-sm"></i>
+                                        </button>
+
+                                        <!-- Logo / Avatar Pengguna -->
+                                        <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#0C146A] to-[#1523BC] text-white flex items-center justify-center mx-auto shadow-md ring-4 ring-slate-100">
+                                            <i class="fa-solid fa-user text-2xl text-sky-300"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Nama & Email -->
+                                    <div class="text-center px-1">
+                                        <h4 class="text-sm font-extrabold text-slate-900 leading-snug">{{ $currentWarga->nama_lengkap ?? session('warga_name', 'Warga Pelapor') }}</h4>
+                                        <p class="text-xs text-slate-500 mt-0.5 break-all font-medium">{{ $currentWarga->email ?? 'warga@gmail.com' }}</p>
+                                        <span class="inline-block mt-2 px-2.5 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
+                                            Warga Pelapor Kab. Jember
+                                        </span>
+                                    </div>
+
+                                    <!-- Tombol Keluar -->
+                                    <div class="mt-4 pt-3.5 border-t border-slate-100">
+                                        <form method="POST" action="{{ route('warga.logout') }}" class="m-0">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="w-full py-2.5 px-4 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                                                <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                                                <span>Keluar dari Akun</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @else
                         <div class="flex items-center gap-2">
@@ -315,8 +371,8 @@
         @yield('content')
     </main>
 
-    <!-- FOOTER (Matching PUPR & Kecamatan) -->
-    @if(!request()->routeIs('warga.login') && !request()->routeIs('warga.register'))
+    <!-- FOOTER (Matching PUPR & Kecamatan, disembunyikan pada auth & password reset) -->
+    @if(!request()->routeIs('warga.login') && !request()->routeIs('warga.register') && !request()->routeIs('password.*') && !isset($hideFooter))
     <footer class="footer-gradient border-t border-white/10 mt-12 py-8">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -342,14 +398,6 @@
     </footer>
     @endif
 
-    <script>
-        function confirmLogout(e) {
-            e.preventDefault();
-            if (confirm('Apakah Anda yakin ingin keluar dari akun Warga?')) {
-                document.getElementById('logout-form').submit();
-            }
-        }
-    </script>
     @stack('scripts')
 </body>
 </html>

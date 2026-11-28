@@ -19,26 +19,30 @@ class LaporanController extends Controller
     public function index(Request $request)
     {
         $wargaId = Session::get('warga_id');
-        $query = Laporan::with(['jalan.desa.kecamatan', 'kategori', 'status'])
-            ->where('id_pengguna', $wargaId);
+        $laporan = Laporan::with(['jalan.desa.kecamatan', 'kategori', 'status'])
+            ->where('id_pengguna', $wargaId)
+            ->latest()
+            ->get();
 
-        if ($request->filled('status')) {
-            $query->where('id_status', $request->status);
-        }
+        $countSemua = $laporan->count();
+        $countMenunggu = $laporan->where('id_status', 1)->count();
+        $countDiproses = $laporan->where('id_status', 2)->count();
+        $countSelesai = $laporan->where('id_status', 3)->count();
+        $countDitolak = $laporan->where('id_status', 4)->count();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('deskripsi', 'like', "%{$search}%")
-                    ->orWhereHas('jalan', function ($j) use ($search) {
-                        $j->where('nama_jalan', 'like', "%{$search}%");
-                    });
-            });
-        }
+        $initialStatus = $request->query('status') ?: 'all';
+        $initialSearch = $request->query('search') ?? '';
 
-        $laporan = $query->latest()->get();
-
-        return view('warga.laporan.index', compact('laporan'));
+        return view('warga.laporan.index', compact(
+            'laporan',
+            'countSemua',
+            'countMenunggu',
+            'countDiproses',
+            'countSelesai',
+            'countDitolak',
+            'initialStatus',
+            'initialSearch'
+        ));
     }
 
     public function create()
@@ -114,7 +118,7 @@ class LaporanController extends Controller
         Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
             'laporan_baru',
             'Laporan Baru Masuk',
-            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di " . ($laporan->jalan->nama_jalan ?? 'wilayah desa') . ".",
+            "Warga melaporkan kerusakan jalan ({$laporan->tingkat_bahaya}) di ".($laporan->jalan->nama_jalan ?? 'wilayah desa').'.',
             $laporan->id_laporan,
             route('kecamatan.validation.index', ['ticket' => $laporan->id_laporan])
         ));

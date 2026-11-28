@@ -15,6 +15,27 @@
     <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <div class="bg-white py-8 px-6 sm:px-10 rounded-2xl border border-slate-200 shadow-xs">
 
+            @if (session('success'))
+                <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl p-3.5 mb-5 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-check text-emerald-500 mt-0.5 text-sm"></i>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('status'))
+                <div class="bg-sky-50 border border-sky-200 text-sky-700 text-xs rounded-xl p-3.5 mb-5 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-info text-sky-500 mt-0.5 text-sm"></i>
+                    <span>{{ session('status') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3.5 mb-5 flex items-start gap-2.5">
+                    <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 text-sm"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl p-3.5 mb-5 space-y-1">
                     @foreach ($errors->all() as $error)
@@ -40,10 +61,10 @@
                                id="login"
                                value="{{ old('login') }}"
                                required
-                               placeholder="Masukkan Email Anda "
+                               placeholder="Masukkan NIK Atau Email Anda "
                                class="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-800 placeholder-slate-400">
                     </div>
-                    <span class="text-[10px] text-slate-400 block mt-1">Warga: masukkan 16 digit NIK &bull; Admin: masukkan alamat email</span>
+                    <span class="text-[10px] text-slate-400 block mt-1">Masukkan 16 digit NIK atau masukkan alamat email</span>
                 </div>
 
                 <div>
@@ -58,20 +79,16 @@
                                name="password"
                                id="password"
                                required
-                               placeholder="Minimal 8 karakter"
+                               placeholder="Masukkan Kata Sandi Anda"
                                class="w-full pl-9 pr-10 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-800 placeholder-slate-400">
                         <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
                             <i id="password-toggle-icon" class="fa-regular fa-eye text-xs"></i>
                         </button>
                     </div>
-                </div>
-
-                <div class="flex items-center justify-between pt-1">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" name="remember" id="remember" class="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900">
-                        <span class="text-xs text-slate-600">Ingat saya</span>
-                    </label>
-                    <span class="text-[11px] text-slate-400">Portal Aman Terenkripsi</span>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-[10px] text-slate-400">Minimal 8 karakter</span>
+                        <a href="{{ route('password.request') }}" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition">Lupa kata sandi?</a>
+                    </div>
                 </div>
 
                 <div class="pt-2">

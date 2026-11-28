@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordResetOtpController;
 use App\Http\Controllers\Auth\WargaAuthController;
 use App\Http\Controllers\Kecamatan\BastController as KecamatanBast;
 use App\Http\Controllers\Kecamatan\DashboardController as KecamatanDashboard;
@@ -80,6 +81,12 @@ Route::get('/login', fn () => redirect()->route('warga.login'))->name('login');
 Route::get('/register', fn () => redirect()->route('warga.register'));
 Route::get('/dashboard', fn () => redirect()->route('warga.dashboard'));
 Route::get('/laporan', fn () => redirect()->route('warga.laporan.index'));
+
+// Password Reset OTP Routes
+Route::get('/forgot-password', [PasswordResetOtpController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetOtpController::class, 'sendOtp'])->middleware('throttle:5,1')->name('password.email');
+Route::get('/reset-password', [PasswordResetOtpController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetOtpController::class, 'resetPassword'])->middleware('throttle:10,1')->name('password.update');
 
 // PUPR Routes
 Route::prefix('pupr')->name('pupr.')->group(function () {

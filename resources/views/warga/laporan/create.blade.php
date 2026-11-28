@@ -7,13 +7,6 @@
 
     <!-- BREADCRUMB & HEADER -->
     <div class="mb-6">
-        <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
-            <a href="{{ route('warga.dashboard') }}" class="hover:text-slate-900 transition">Beranda</a>
-            <span>/</span>
-            <a href="{{ route('warga.laporan.index') }}" class="hover:text-slate-900 transition">Riwayat Laporan</a>
-            <span>/</span>
-            <span class="text-slate-800 font-semibold">Buat Laporan Baru</span>
-        </div>
         <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Formulir Laporan Kerusakan Jalan</h1>
     </div>
 
@@ -33,14 +26,14 @@
     @endif
 
     <!-- FORM CARD -->
-    <div class="bg-[#F5F5F5] saturate-50 rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8">
+    <div class="bg-[#F5F5F5] rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8">
         <form action="{{ route('warga.laporan.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- SECTION 1: LOKASI KERUSAKAN -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-5">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">1</div>
+                    <div class="w-8 h-8 rounded-lg navy-gradient text-white flex items-center justify-center text-xs font-bold">1</div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Lokasi Kerusakan Jalan</h2>
                     </div>
@@ -79,7 +72,7 @@
             <!-- SECTION 2: DETAIL KERUSAKAN -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-5">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">2</div>
+                    <div class="w-8 h-8 rounded-lg navy-gradient text-white flex items-center justify-center text-xs font-bold">2</div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Detail Kerusakan & Tingkat Bahaya</h2>
                     </div>
@@ -128,7 +121,7 @@
             <!-- SECTION 3: KOORDINAT GPS (OPSIONAL) -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-5">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">3</div>
+                    <div class="w-8 h-8 rounded-lg navy-gradient text-white flex items-center justify-center text-xs font-bold">3</div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Titik Koordinat GPS (Opsional)</h2>
                     </div>
@@ -157,7 +150,7 @@
             <!-- SECTION 4: FOTO BUKTI KERUSAKAN -->
             <div class="mb-8">
                 <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-5">
-                    <div class="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold">4</div>
+                    <div class="w-8 h-8 rounded-lg navy-gradient text-white flex items-center justify-center text-xs font-bold">4</div>
                     <div>
                         <h2 class="text-sm font-bold text-slate-900">Foto Bukti Kerusakan <span class="text-red-500">*</span></h2>
                     </div>

@@ -6,13 +6,13 @@
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- WELCOME BANNER -->
-    <div class="bg-slate-900 rounded-2xl p-6 sm:p-8 text-white mb-4 shadow-sm relative overflow-hidden">
+    <div class="navy-gradient rounded-2xl p-6 sm:p-8 text-white mb-4 shadow-sm relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
                     Selamat Datang, {{ session('warga_name', 'Warga Jember') }}!
                 </h1>
-                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
+                <p class="text-blue-100 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
                     Sampaikan laporan kondisi kerusakan infrastruktur jalan di lingkungan Anda secara langsung dan pantau proses verifikasi hingga perbaikan lapangan secara transparan.
                 </p>
             </div>

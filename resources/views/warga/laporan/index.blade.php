@@ -3,62 +3,83 @@
 @section('title', 'Riwayat Laporan Kerusakan Jalan')
 
 @section('content')
-<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8"
+     x-data="{
+        status: {{ \Illuminate\Support\Js::from((string) ($initialStatus ?: 'all')) }},
+        search: {{ \Illuminate\Support\Js::from((string) ($initialSearch ?? '')) }},
+        hasVisibleRows: true,
+        init() {
+            this.checkVisibility();
+            this.$watch('status', (val) => {
+                const url = new URL(window.location);
+                if (!val || val === 'all') {
+                    url.searchParams.delete('status');
+                } else {
+                    url.searchParams.set('status', val);
+                }
+                window.history.replaceState({}, '', url);
+                this.$nextTick(() => this.checkVisibility());
+            });
+            this.$watch('search', () => this.$nextTick(() => this.checkVisibility()));
+        },
+        matches(rowStatus, rowText) {
+            const matchesStatus = (this.status === 'all' || this.status === rowStatus.toString());
+            const q = this.search.toLowerCase().trim();
+            const matchesSearch = !q || (rowText || '').toLowerCase().includes(q);
+            return matchesStatus && matchesSearch;
+        },
+        checkVisibility() {
+            const rows = document.querySelectorAll('.laporan-item-row');
+            let count = 0;
+            rows.forEach(r => {
+                if (r.style.display !== 'none') {
+                    count++;
+                }
+            });
+            this.hasVisibleRows = (count > 0);
+        }
+     }">
 
     <!-- PAGE HEADER -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <div class="flex items-center gap-2 text-xs text-slate-500 mb-1">
-                <a href="{{ route('warga.dashboard') }}" class="hover:text-slate-900 transition">Beranda</a>
-                <span>/</span>
-                <span class="text-slate-800 font-semibold">Riwayat Laporan</span>
-            </div>
             <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Riwayat Laporan Anda</h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('warga.laporan.create') }}" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-xs">
-                <i class="fa-solid fa-circle-plus text-amber-400"></i>
-                <span>Buat Laporan Baru</span>
-            </a>
         </div>
     </div>
 
     <!-- FILTER & SEARCH BAR -->
     <div class="bg-[#FCFAF9] rounded-2xl p-4 border border-slate-200 shadow-xs mb-6">
-        <form action="{{ route('warga.laporan.index') }}" method="GET" class="flex flex-col sm:flex-row items-center gap-3">
-            <!-- Search -->
+        <div class="flex flex-col sm:flex-row items-center gap-3">
+            <!-- Live Search (Kiri) -->
             <div class="relative flex-1 w-full">
                 <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                 <input type="text"
-                       name="search"
-                       value="{{ request('search') }}"
+                       x-model="search"
                        placeholder="Cari berdasarkan nama jalan"
-                       class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-800 placeholder-slate-400">
+                       class="w-full pl-9 pr-8 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-800 placeholder-slate-400">
+                <button type="button"
+                        x-show="search.length > 0"
+                        x-cloak
+                        @click="search = ''"
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 text-xs"
+                        title="Hapus pencarian">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
-            <!-- Status Filter -->
+            <!-- Status Filter Dropdown (Kanan) -->
             <div class="w-full sm:w-56 shrink-0">
-                <select name="status" class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-700">
-                    <option value="">Semua Status Laporan</option>
-                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Menunggu Validasi</option>
-                    <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Diproses PUPR</option>
-                    <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Selesai Diperbaiki</option>
-                    <option value="4" {{ request('status') == '4' ? 'selected' : '' }}>Ditolak</option>
+                <select x-model="status"
+                        aria-label="Filter Status Laporan"
+                        class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 bg-slate-50 text-slate-700 cursor-pointer">
+                    <option value="all">Semua Status Laporan ({{ $countSemua }})</option>
+                    <option value="1">Menunggu Validasi ({{ $countMenunggu }})</option>
+                    <option value="2">Diproses PUPR ({{ $countDiproses }})</option>
+                    <option value="3">Selesai Diperbaiki ({{ $countSelesai }})</option>
+                    <option value="4">Ditolak ({{ $countDitolak }})</option>
                 </select>
             </div>
-
-            <!-- Submit & Reset -->
-            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                <button type="submit" class="flex-1 sm:flex-none px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition">
-                    Filter
-                </button>
-                @if(request('search') || request('status'))
-                    <a href="{{ route('warga.laporan.index') }}" class="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition">
-                        Reset
-                    </a>
-                @endif
-            </div>
-        </form>
+        </div>
     </div>
 
     <!-- TABLE CARD -->
@@ -77,7 +98,10 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
                     @forelse($laporan as $index => $item)
-                        <tr class="hover:bg-slate-50/60 transition-colors">
+                        <tr class="hover:bg-slate-50/60 transition-colors laporan-item-row"
+                            data-status="{{ $item->id_status }}"
+                            data-search="{{ strtolower(($item->jalan->nama_jalan ?? '') . ' ' . ($item->jalan->desa->nama_desa ?? '') . ' ' . ($item->jalan->desa->kecamatan->nama_kecamatan ?? '') . ' ' . ($item->kategori->nama_kategori ?? '') . ' ' . ($item->tingkat_bahaya ?? '') . ' LP-' . $item->created_at->format('Y') . '-' . str_pad($item->id_laporan, 4, '0', STR_PAD_LEFT)) }}"
+                            x-show="matches($el.dataset.status, $el.dataset.search)">
                             <!-- No -->
                             <td class="py-4 px-4 text-center font-bold text-slate-400">
                                 {{ $index + 1 }}
@@ -174,6 +198,24 @@
                             </td>
                         </tr>
                     @endforelse
+
+                    @if($laporan->isNotEmpty())
+                        <tr x-show="!hasVisibleRows" x-cloak>
+                            <td colspan="6" class="py-12 px-4 text-center">
+                                <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                                    <i class="fa-regular fa-folder-open text-xl"></i>
+                                </div>
+                                <h4 class="text-sm font-bold text-slate-800 mb-1">Tidak Ada Laporan yang Sesuai</h4>
+                                <p class="text-xs text-slate-500 max-w-sm mx-auto mb-4">
+                                    Tidak ditemukan laporan dengan filter status atau kata kunci pencarian yang dipilih.
+                                </p>
+                                <button type="button" @click="status = 'all'; search = '';" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition">
+                                    <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                                    <span>Tampilkan Semua Laporan</span>
+                                </button>
+                            </td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
         </div>

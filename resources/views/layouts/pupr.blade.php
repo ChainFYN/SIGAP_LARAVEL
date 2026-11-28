@@ -103,7 +103,7 @@
                         <form id="logout-form" action="{{ route('pupr.logout') ?? '#' }}" method="POST" class="d-none">
                             @csrf
                         </form>
-                        <a href="#" class="nav-link nav-link-sigap" onclick="confirmLogout(event)">Logout</a>
+                        <a href="#" class="nav-link nav-link-sigap" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a>
                     </li>
                     @else
                     <li class="nav-item">
@@ -140,16 +140,27 @@
         </div>
     </footer>
 
+    <!-- Logout Confirmation Modal (Website Template) -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="logoutModalLabel">Konfirmasi Keluar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-secondary">
+                    Apakah Anda yakin ingin keluar dari akun PUPR?
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" onclick="document.getElementById('logout-form').submit();">Ya, Keluar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function confirmLogout(e) {
-            e.preventDefault();
-            if (confirm('Apakah Anda yakin ingin keluar dari akun ini?')) {
-                document.getElementById('logout-form').submit();
-            }
-        }
-    </script>
     @stack('scripts')
 </body>
 </html>

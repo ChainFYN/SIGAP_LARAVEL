@@ -104,10 +104,18 @@ class WargaAuthController extends Controller
         return redirect()->route('warga.dashboard')->with('success', 'Akun berhasil dibuat!');
     }
 
-    public function logout()
+    public function logout(Request $request)
     {
-        Session::forget(['warga_id', 'warga_name', 'pupr_id', 'pupr_name', 'kecamatan_id', 'kecamatan_name']);
+        try {
+            Session::forget(['warga_id', 'warga_name', 'pupr_id', 'pupr_name', 'kecamatan_id', 'kecamatan_name']);
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-        return redirect()->route('warga.login')->with('success', 'Berhasil logout.');
+            return redirect()->route('warga.login');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('warga.login')->with('error', 'Terjadi kesalahan saat keluar dari akun.');
+        }
     }
 }

@@ -266,15 +266,68 @@
                             <i class="fa-regular fa-user"></i>
                         </div>
 
-                        <form method="POST" action="{{ route('kecamatan.logout') }}"
-                            class="flex items-center"
-                            onsubmit="return confirm('Apakah Anda yakin ingin keluar dari akun Kecamatan?')">
-                            @csrf
-                            <button type="submit" title="Keluar / Logout"
-                                class="flex items-center justify-center w-10 h-10 text-slate-200 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
+                        <!-- Tombol & Popover Logout di Pojok Kanan Atas -->
+                        <div class="relative" x-data="{ logoutOpen: false }">
+                            <button type="button"
+                                    @click="logoutOpen = !logoutOpen"
+                                    title="Keluar / Logout"
+                                    :class="logoutOpen ? 'bg-white/20 text-white' : 'text-slate-200 hover:text-white hover:bg-white/10'"
+                                    class="flex items-center justify-center w-10 h-10 rounded-lg transition-colors focus:outline-none cursor-pointer">
                                 <i class="fa-solid fa-arrow-right-from-bracket text-base"></i>
                             </button>
-                        </form>
+
+                            <!-- Backdrop transparan untuk klik di luar -->
+                            <div x-show="logoutOpen"
+                                 x-cloak
+                                 @click="logoutOpen = false"
+                                 class="fixed inset-0 z-40"></div>
+
+                            <!-- Popover Profil & Logout (Logo, Nama, Email, Tombol Keluar) -->
+                            <div x-show="logoutOpen"
+                                 x-cloak
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95 -translate-y-1"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 scale-95 -translate-y-1"
+                                 @keydown.escape.window="logoutOpen = false"
+                                 class="absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-5 z-50 text-slate-800 ring-1 ring-black/5">
+                                
+                                <div class="relative mb-3">
+                                    <!-- Tombol Tutup X -->
+                                    <button type="button" @click="logoutOpen = false" class="absolute -top-1 -right-1 w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition cursor-pointer">
+                                        <i class="fa-solid fa-xmark text-sm"></i>
+                                    </button>
+
+                                    <!-- Logo / Avatar Pengguna -->
+                                    <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-[#0C146A] to-[#1523BC] text-white flex items-center justify-center mx-auto shadow-md ring-4 ring-slate-100">
+                                        <i class="fa-solid fa-landmark text-2xl text-amber-300"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Nama & Email -->
+                                <div class="text-center px-1">
+                                    <h4 class="text-sm font-extrabold text-slate-900 leading-snug">{{ $currentKecamatan->nama_lengkap ?? session('kecamatan_name', 'Admin Kecamatan') }}</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5 break-all font-medium">{{ $currentKecamatan->email ?? 'kecamatan@gmail.com' }}</p>
+                                    <span class="inline-block mt-2 px-2.5 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-full">
+                                        Kantor Kecamatan Jember
+                                    </span>
+                                </div>
+
+                                <!-- Tombol Keluar -->
+                                <div class="mt-4 pt-3.5 border-t border-slate-100">
+                                    <form method="POST" action="{{ route('kecamatan.logout') }}" class="m-0">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full py-2.5 px-4 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                                            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+                                            <span>Keluar dari Akun</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
