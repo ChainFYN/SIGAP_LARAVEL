@@ -46,7 +46,7 @@ class BastController extends Controller
             'url_pdf_bast' => $pdfPath,
         ]);
 
-        return redirect()->route('pupr.bast.index')->with('success', 'BAST berhasil dibuat dan dikirim ke Kecamatan!');
+        return redirect()->route('pupr.bast.index')->with('success', 'Laporan berhasil dibuat dan dikirim ke Kecamatan!');
     }
 
     public function updateStatus(Request $request, $id)
@@ -77,6 +77,6 @@ class BastController extends Controller
             ]);
         }
 
-        return redirect()->route('pupr.bast.index')->with('success', 'Status BAST berhasil diupdate!');
+        return redirect()->route('pupr.bast.index')->with('success', 'Status Laporan berhasil diupdate!');
     }
 }

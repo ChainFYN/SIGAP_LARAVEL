@@ -143,7 +143,7 @@ class ProgresController extends Controller
             $laporan->pengguna->notify(new LaporanWargaNotification(
                 'progres_update',
                 "Update Progres: {$persen}% ({$tahapanName})",
-                "Pengerjaan jalan di " . ($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda') . " telah mencapai {$persen}%: {$tahapanName}.",
+                'Pengerjaan jalan di '.($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda')." telah mencapai {$persen}%: {$tahapanName}.",
                 $laporan->id_laporan,
                 route('warga.laporan.show', $laporan->id_laporan)
             ));
@@ -154,17 +154,17 @@ class ProgresController extends Controller
             $laporan->status_bast = 'MENUNGGU_VERIFIKASI';
             $laporan->save();
 
-            // Kirim notifikasi pengajuan BAST ke Kecamatan/Camat (id_peran = 2)
+            // Kirim notifikasi pengajuan Laporan PUPR ke Kecamatan/Camat (id_peran = 2)
             $petugasKecamatan = Pengguna::where('id_peran', 2)->get();
             Notification::send($petugasKecamatan, new LaporanKecamatanNotification(
                 'pengajuan_bast',
-                'Pengajuan BAST (Fisik 100%)',
-                "PUPR telah merampungkan fisik 100% untuk Laporan #LP-{$laporan->id_laporan}. Menunggu verifikasi BAST Camat.",
+                'Pengajuan Laporan PUPR (Fisik 100%)',
+                "PUPR telah merampungkan fisik 100% untuk Laporan #LP-{$laporan->id_laporan}. Menunggu verifikasi Laporan PUPR oleh Camat.",
                 $laporan->id_laporan,
                 route('kecamatan.bast.index', ['ticket' => $laporan->id_laporan])
             ));
 
-            return redirect()->route('pupr.dashboard')->with('success', 'Laporan telah diselesaikan 100% dan berkas dikirim ke BAST Kecamatan (Menunggu Verifikasi Camat).');
+            return redirect()->route('pupr.dashboard')->with('success', 'Laporan telah diselesaikan 100% dan berkas dikirim ke Verifikasi Laporan PUPR Kecamatan (Menunggu Verifikasi Camat).');
         }
 
         return redirect()->route('pupr.progres.show', $id)->with('success', 'Update progres '.$persen.'% berhasil disimpan dan dipublikasikan!');

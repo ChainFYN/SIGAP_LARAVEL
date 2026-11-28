@@ -6,7 +6,7 @@
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-black text-slate-900 tracking-tight">Riwayat Penanganan Laporan</h1>
-            <p class="text-sm text-slate-500 mt-1">Daftar progres pekerjaan fisik lapangan (25% - 100%) dan status verifikasi BAST.</p>
+            <p class="text-sm text-slate-500 mt-1">Daftar progres pekerjaan fisik lapangan (25% - 100%) dan status verifikasi laporan.</p>
         </div>
 
         <!-- Filter Tab -->

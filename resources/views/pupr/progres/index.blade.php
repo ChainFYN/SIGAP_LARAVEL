@@ -325,9 +325,9 @@
 
         // Ubah Teks Tombol
         if(currentPersen === 100) {
-            document.getElementById('btnSubmitForm').innerText = 'Selesaikan & Buat BAST';
+            document.getElementById('btnSubmitForm').innerText = 'Selesaikan & Buat Laporan';
             if(document.getElementById('btnSubmitModal')) {
-                document.getElementById('btnSubmitModal').innerText = 'Selesaikan & Buat BAST';
+                document.getElementById('btnSubmitModal').innerText = 'Selesaikan & Buat Laporan';
             }
         } else {
             document.getElementById('btnSubmitForm').innerText = 'Simpan & Publikasikan Progres';

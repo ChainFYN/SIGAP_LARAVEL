@@ -38,14 +38,14 @@
     <!-- KPI CARDS -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <a href="{{ route('kecamatan.bast.index', ['tab' => 'antrean']) }}" class="block bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 transition-all hover:shadow-md hover:border-slate-300 text-center">
             <div class="flex items-center justify-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">PERLU TINDAKAN</div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">VERIFIKASI LAPORAN PUPR</div>
             </div>
             <div class="flex items-center justify-center h-full">
                 <div class="text-4xl font-extrabold text-slate-900">{{ $perluTindakanCount }}</div>
             </div>
-        </div>
+        </a>
 
         <a href="{{ route('kecamatan.validation.index', ['tab' => 'pending']) }}" class="block bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 transition-all hover:shadow-md hover:border-slate-300 text-center">
             <div class="flex items-center justify-center">
@@ -65,14 +65,14 @@
             </div>
         </a>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 text-center">
+        <a href="{{ route('kecamatan.bast.index', ['tab' => 'selesai']) }}" class="block bg-white rounded-2xl p-5 border border-slate-200 shadow-xs relative overflow-hidden flex flex-col justify-between h-32 transition-all hover:shadow-md hover:border-slate-300 text-center">
             <div class="flex items-center justify-center">
-                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">BAST SELESAI DIVERIFIKASI</div>
+                <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">LAPORAN PUPR SELESAI DIVERIFIKASI</div>
             </div>
             <div class="flex items-center justify-center h-full">
                 <div class="text-4xl font-extrabold text-slate-900">{{ $totalResolvedRuas }}</div>
             </div>
-        </div>
+        </a>
 
     </div>
 

@@ -1,6 +1,6 @@
 @extends('kecamatan.layouts.app')
 
-@section('title', 'Verifikasi BAST PUPR - Pemeriksaan & Penyerahan Hasil')
+@section('title', 'Verifikasi Laporan PUPR - Pemeriksaan & Penyerahan Hasil')
 
 @section('content')
 <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -8,14 +8,9 @@
     <!-- BREADCRUMB & HEADER -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
-            <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1">
-                <a href="{{ route('kecamatan.dashboard') }}" class="hover:text-slate-700 transition-colors">Halaman Utama</a>
-                <span>/</span>
-                <span class="text-slate-800">Verifikasi BAST PUPR</span>
-            </nav>
             <div class="flex items-center gap-3">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                    Pemeriksaan Verifikasi BAST dari PUPR
+                Verifikasi Laporan dari PUPR
                 </h1>
             </div>
         </div>
@@ -59,9 +54,10 @@ function filterWaktuBast(waktu, el) {
     container.style.opacity = '0.5';
 
     const url = new URL(window.location);
+    const tab = url.searchParams.get('tab') || 'antrean';
     const search = url.searchParams.get('search') || '';
 
-    let fetchUrl = `{{ route('kecamatan.bast.index') }}?waktu=${waktu}`;
+    let fetchUrl = `{{ route('kecamatan.bast.index') }}?waktu=${waktu}&tab=${encodeURIComponent(tab)}`;
     if (search) {
         fetchUrl += `&search=${encodeURIComponent(search)}`;
     }

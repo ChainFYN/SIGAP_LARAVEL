@@ -18,6 +18,8 @@ class BastController extends Controller
     public function index(Request $request)
     {
         $timeFilter = $request->query('waktu', 'all');
+        $tab = $request->query('tab', 'antrean');
+        $tab = $tab === 'selesai' ? 'selesai' : 'antrean';
         $search = $request->query('search', '');
         $selectedId = $request->query('ticket');
 
@@ -43,15 +45,27 @@ class BastController extends Controller
             };
         };
 
-        // Laporan yang butuh verifikasi BAST oleh Camat
-        $query = Laporan::with(['jalan.desa.kecamatan', 'kategori', 'pengguna', 'logProses'])
-            ->where(function ($q) {
+        $antreanScope = function ($query) {
+            return $query->where(function ($q) {
                 $q->where('status_bast', 'MENUNGGU_VERIFIKASI')
                     ->orWhere(function ($q2) {
                         $q2->where('id_status', 3)->whereNull('status_bast');
                     });
             });
+        };
 
+        $selesaiScope = function ($query) {
+            return $query->where('id_status', 3)
+                ->where('status_bast', 'DIVERIFIKASI');
+        };
+
+        // Hitung jumlah tab sesuai filter waktu aktif
+        $antreanCount = $applyTimeFilter($antreanScope(Laporan::query()))->count();
+        $selesaiCount = $applyTimeFilter($selesaiScope(Laporan::query()))->count();
+
+        // Query daftar laporan berdasarkan tab aktif
+        $query = Laporan::with(['jalan.desa.kecamatan', 'kategori', 'pengguna', 'logProses']);
+        $query = $tab === 'selesai' ? $selesaiScope($query) : $antreanScope($query);
         $query = $applyTimeFilter($query);
 
         if (! empty($search)) {
@@ -81,7 +95,16 @@ class BastController extends Controller
             default => 'Semua Waktu',
         };
 
-        $viewData = compact('laporan_bast', 'activeBast', 'timeFilter', 'filterLabel', 'search');
+        $viewData = compact(
+            'laporan_bast',
+            'activeBast',
+            'tab',
+            'antreanCount',
+            'selesaiCount',
+            'timeFilter',
+            'filterLabel',
+            'search'
+        );
 
         if ($request->ajax()) {
             return view('kecamatan.bast.partials.workspace', $viewData);
@@ -98,11 +121,11 @@ class BastController extends Controller
         $kecamatanId = Session::get('kecamatan_id') ?? 1;
 
         if ($action === 'acc') {
-            // Camat verifikasi BAST dan kirim ke warga
+            // Camat verifikasi Laporan PUPR dan kirim ke warga
             $laporan->update([
                 'id_status' => 3, // Selesai resmi
                 'status_bast' => 'DIVERIFIKASI',
-                'catatan_bast' => $catatan ?: 'Telah dilakukan uji petik lapangan dan disetujui BAST.',
+                'catatan_bast' => $catatan ?: 'Telah dilakukan uji petik lapangan dan disetujui Laporan PUPR.',
                 'tgl_verifikasi_bast' => now(),
             ]);
 
@@ -115,15 +138,15 @@ class BastController extends Controller
                 'id_laporan' => $laporan->id_laporan,
                 'id_pengguna' => $kecamatanId,
                 'id_status' => 3,
-                'catatan_update' => 'BAST diverifikasi Camat & diterbitkan ke warga. Catatan: '.($catatan ?: 'Lolos uji petik & spesifikasi teknis.'),
+                'catatan_update' => 'Laporan PUPR diverifikasi Camat & diterbitkan ke warga. Catatan: '.($catatan ?: 'Lolos uji petik & spesifikasi teknis.'),
             ]);
 
-            // 1. Notifikasi ke Petugas PUPR bahwa BAST disetujui resmi
+            // 1. Notifikasi ke Petugas PUPR bahwa Laporan PUPR disetujui resmi
             $petugasPupr = Pengguna::where('id_peran', 3)->get();
             Notification::send($petugasPupr, new LaporanPUPRNotification(
                 'bast_disetujui',
-                'BAST Diverifikasi Camat (Selesai)',
-                "BAST Laporan #LP-{$laporan->id_laporan} di " . ($laporan->jalan->nama_jalan ?? 'jalan desa') . " telah diverifikasi & disetujui oleh Camat.",
+                'Laporan PUPR Diverifikasi Camat (Selesai)',
+                "Laporan PUPR #LP-{$laporan->id_laporan} di ".($laporan->jalan->nama_jalan ?? 'jalan desa').' telah diverifikasi & disetujui oleh Camat.',
                 $laporan->id_laporan,
                 route('pupr.riwayat', ['status' => '100'])
             ));
@@ -132,15 +155,15 @@ class BastController extends Controller
             if ($laporan->pengguna) {
                 $laporan->pengguna->notify(new LaporanWargaNotification(
                     'laporan_selesai',
-                    'Jalan Selesai Diperbaiki & BAST Sah',
-                    "Kabar baik! Perbaikan jalan di " . ($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda') . " telah selesai 100% dan disahkan melalui BAST.",
+                    'Jalan Selesai Diperbaiki & Laporan PUPR Sah',
+                    'Kabar baik! Perbaikan jalan di '.($laporan->jalan->nama_jalan ?? 'lokasi laporan Anda').' telah selesai 100% dan disahkan melalui Laporan PUPR.',
                     $laporan->id_laporan,
                     route('warga.laporan.show', $laporan->id_laporan)
                 ));
             }
 
             return redirect()->route('kecamatan.bast.index')
-                ->with('status', "BAST untuk Laporan #{$laporan->id_laporan} berhasil diverifikasi & dikirim ke warga!")
+                ->with('status', "Laporan PUPR #{$laporan->id_laporan} berhasil diverifikasi & dikirim ke warga!")
                 ->with('status_type', 'success');
         } else {
             // Tolak / Minta Perbaikan Lapangan ke PUPR
@@ -155,8 +178,8 @@ class BastController extends Controller
             $petugasPupr = Pengguna::where('id_peran', 3)->get();
             Notification::send($petugasPupr, new LaporanPUPRNotification(
                 'bast_ditolak',
-                'BAST Ditolak (Perlu Perbaikan)',
-                "Laporan #LP-{$laporan->id_laporan} perlu perbaikan: " . ($catatan ?: 'Perbaikan minor belum sesuai.'),
+                'Laporan PUPR Ditolak (Perlu Perbaikan)',
+                "Laporan #LP-{$laporan->id_laporan} perlu perbaikan: ".($catatan ?: 'Perbaikan minor belum sesuai.'),
                 $laporan->id_laporan,
                 route('pupr.progres.show', $laporan->id_laporan)
             ));
@@ -165,11 +188,11 @@ class BastController extends Controller
                 'id_laporan' => $laporan->id_laporan,
                 'id_pengguna' => $kecamatanId,
                 'id_status' => 2,
-                'catatan_update' => 'BAST ditolak oleh Camat. Diminta perbaikan lapangan: '.($catatan ?: 'Perbaikan minor belum memenuhi toleransi.'),
+                'catatan_update' => 'Laporan PUPR ditolak oleh Camat. Diminta perbaikan lapangan: '.($catatan ?: 'Perbaikan minor belum memenuhi toleransi.'),
             ]);
 
             return redirect()->route('kecamatan.bast.index')
-                ->with('status', "BAST Laporan #{$laporan->id_laporan} ditolak dan dikembalikan ke Dinas PUPR untuk perbaikan.")
+                ->with('status', "Laporan PUPR #{$laporan->id_laporan} ditolak dan dikembalikan ke Dinas PUPR untuk perbaikan.")
                 ->with('status_type', 'warning');
         }
     }
